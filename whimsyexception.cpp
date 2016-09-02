@@ -1,6 +1,8 @@
 #include "whimsyexception.h"
 
-WhimsyException::WhimsyException(const char* info) :
+using namespace whimsycore;
+
+Exception::Exception(const char* info) :
     _identifiable(false),
     _cause(NULL),
     _xctype(Unknown),
@@ -12,7 +14,7 @@ WhimsyException::WhimsyException(const char* info) :
         _uses_additional_info = false;
 }
 
-WhimsyException::WhimsyException(WhimsyBase* objref, ExceptionType reasons, const char* info) :
+Exception::Exception(Base* objref, ExceptionType reasons, const char* info) :
     _identifiable(true),
     _cause(objref),
     _xctype(reasons),
@@ -24,7 +26,7 @@ WhimsyException::WhimsyException(WhimsyBase* objref, ExceptionType reasons, cons
         _uses_additional_info = false;
 }
 
-std::string WhimsyException::toString() const
+std::string Exception::toString() const
 {
     std::ostringstream retval;
     if(_identifiable)
@@ -43,12 +45,12 @@ std::string WhimsyException::toString() const
     return retval.str().c_str();
 }
 
-const char* WhimsyException::what() const throw()
+const char* Exception::what() const throw()
 {
     return toString().c_str();
 }
 
-const char* WhimsyException::exceptionTypeToString(ExceptionType t)
+const char* Exception::exceptionTypeToString(ExceptionType t)
 {
     switch(t)
     {
@@ -60,6 +62,10 @@ const char* WhimsyException::exceptionTypeToString(ExceptionType t)
             return "Array out of bounds";
         case InvalidConversion:
             return "Invalid conversion";
+        case NameConflict:
+            return "Name conflict";
+        case NotFound:
+            return "Not found";
         default:
             return "Not specified";
     }

@@ -1,22 +1,24 @@
 #include "whimsynote.h"
 #include <sstream>
 
-WhimsyNote::WhimsyNote(const char *notestr)
+using namespace whimsycore;
+
+Note::Note(const char *notestr)
 {
     fromString(notestr);
 }
 
-WhimsyNote::WhimsyNote(std::string notestr)
+Note::Note(std::string notestr)
 {
     fromString(notestr.c_str());
 }
 
-void WhimsyNoteProto::fromString(std::string note)
+void NoteProto::fromString(std::string note)
 {
     fromString(note.c_str());
 }
 
-void WhimsyNoteProto::fromString(const char *note)
+void NoteProto::fromString(const char *note)
 {
     char                chrome, octave = 4;
     char*               octavepos;
@@ -53,7 +55,7 @@ void WhimsyNoteProto::fromString(const char *note)
     _notedata =     WHIMSYNOTE_OFFSET + chrome + octave*12;
 }
 
-std::string WhimsyNoteProto::toString() const
+std::string NoteProto::toString() const
 {   
     std::ostringstream  retstream;
     int chrome, octave, prenote;
@@ -88,22 +90,22 @@ std::string WhimsyNoteProto::toString() const
     return retstream.str();
 }
 
-unsigned char& WhimsyNoteProto::value()
+unsigned char& NoteProto::value()
 {
     return _notedata;
 }
 
-int WhimsyNoteProto::toInt() const
+int NoteProto::toInt() const
 {
     return static_cast<int>(_notedata);
 }
 
-bool WhimsyNoteProto::isNull() const
+bool NoteProto::isNull() const
 {
     return (_notedata == WHIMSYNOTE_NULL);
 }
 
-std::string WhimsyNote::toString() const
+std::string Note::toString() const
 {
-    return WhimsyNoteProto::toString();
+    return NoteProto::toString();
 }

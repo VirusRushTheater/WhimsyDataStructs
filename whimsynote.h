@@ -1,5 +1,4 @@
-#ifndef WHIMSYNOTE_H
-#define WHIMSYNOTE_H
+#pragma once
 
 #include "whimsybase.h"
 
@@ -9,12 +8,15 @@
 #define     WHIMSYNOTE_NULL         0
 #define     WHIMSYNOTE_OFFSET       128
 
-/**
- * @brief Use WhimsyNote class instead, please.
- */
-class WhimsyNoteProto
+namespace whimsycore
 {
-    friend class WhimsyNote;
+
+/**
+ * @brief Use Note class instead, please.
+ */
+class NoteProto
+{
+    friend class Note;
 
 protected:
     unsigned char _notedata;
@@ -33,18 +35,18 @@ public:
 /**
  * @brief Convenient way to store a note's information.
  */
-class WhimsyNote : public WhimsyNoteProto, public WhimsyBase
+class Note : public NoteProto, public Base
 {
 public:
     WHIMSY_OBJECT_NAME("WhimsyNote")
 
-    WhimsyNote(){_notedata = WHIMSYNOTE_OFFSET;}
-    WhimsyNote(const WhimsyNoteProto& c){_notedata = c._notedata;}
-    WhimsyNote(int note){_notedata = note & 255;}
-    WhimsyNote(const char* notestr);
-    WhimsyNote(std::string notestr);
+    Note(){_notedata = WHIMSYNOTE_OFFSET;}
+    Note(const NoteProto& c){_notedata = c._notedata;}
+    Note(int note){_notedata = note & 255;}
+    Note(const char* notestr);
+    Note(std::string notestr);
 
     std::string     toString() const;
 };
+}
 
-#endif // WHIMSYNOTE_H

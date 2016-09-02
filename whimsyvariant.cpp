@@ -1,12 +1,18 @@
 #include "whimsyvariant.h"
+
 #include <sstream>
+#include <iomanip>
+
+using namespace whimsycore;
+
+const Variant Variant::null = Variant();
 
 /**
  * @brief Empty constructor. Initializes this variant as a null pointer.
  */
-WhimsyVariant::WhimsyVariant()
+Variant::Variant()
 {
-    _data_type =            VariantType::Null;
+    _data_type =            Type::Null;
     _data.Integer =         0;
 }
 
@@ -14,7 +20,7 @@ WhimsyVariant::WhimsyVariant()
  * @brief Copy constructor. Doesn't deep copy memory items if in memory, but passes a reference to it.
  * @param wref      Initializing value.
  */
-WhimsyVariant::WhimsyVariant(const WhimsyVariant& wref) :
+Variant::Variant(const Variant& wref) :
     _data_type(wref._data_type),
     _data(wref._data)
 {
@@ -26,9 +32,9 @@ WhimsyVariant::WhimsyVariant(const WhimsyVariant& wref) :
  * @brief Boolean constructor. Makes this variant take the value of a boolean.
  * @param _bool_t   Initializing value.
  */
-WhimsyVariant::WhimsyVariant(bool _bool)
+Variant::Variant(bool _bool)
 {
-    _data_type =            VariantType::Bool;
+    _data_type =            Type::Bool;
     _data.Bool =            _bool;
 }
 
@@ -36,15 +42,15 @@ WhimsyVariant::WhimsyVariant(bool _bool)
  * @brief Int constructor. Makes this variant take the value of an integer.
  * @param _bool_t   Initializing value.
  */
-WhimsyVariant::WhimsyVariant(int _int)
+Variant::Variant(int _int)
 {
-    _data_type =            VariantType::Integer;
+    _data_type =            Type::Integer;
     _data.Integer =         _int;
 }
 
-WhimsyVariant::WhimsyVariant(long long _long)
+Variant::Variant(long long _long)
 {
-    _data_type =            VariantType::Long;
+    _data_type =            Type::Long;
     _data.Long =            _long;
 }
 
@@ -52,9 +58,9 @@ WhimsyVariant::WhimsyVariant(long long _long)
  * @brief Float constructor. Makes this variant take the value of a float.
  * @param _float    Initializing value.
  */
-WhimsyVariant::WhimsyVariant(float _float)
+Variant::Variant(float _float)
 {
-    _data_type =            VariantType::Float;
+    _data_type =            Type::Float;
     _data.Float =           _float;
 }
 
@@ -62,9 +68,9 @@ WhimsyVariant::WhimsyVariant(float _float)
  * @brief Double constructor. Makes this variant take the value of a double.
  * @param _double    Initializing value.
  */
-WhimsyVariant::WhimsyVariant(double _double)
+Variant::Variant(double _double)
 {
-    _data_type =            VariantType::Double;
+    _data_type =            Type::Double;
     _data.Double =          _double;
 }
 
@@ -72,9 +78,9 @@ WhimsyVariant::WhimsyVariant(double _double)
  * @brief Note constructor. Makes this variant take the value of a note.
  * @param _note     Initializing value.
  */
-WhimsyVariant::WhimsyVariant(WhimsyNote _note)
+Variant::Variant(whimsycore::Note _note)
 {
-    _data_type =            VariantType::Note;
+    _data_type =            Type::Note;
     _data.Note =            _note;
 }
 
@@ -82,9 +88,9 @@ WhimsyVariant::WhimsyVariant(WhimsyNote _note)
  * @brief String constructor. Makes this variant take the value of a string.
  * @param _cstr     Initializing value.
  */
-WhimsyVariant::WhimsyVariant(const char *_cstr)
+Variant::Variant(const char *_cstr)
 {
-    _data_type =            VariantType::String;
+    _data_type =            Type::String;
     _data.String =          new VDPointer<std::string>(std::string(_cstr));
     //_data.String =          new std::string(_cstr);
 }
@@ -93,9 +99,9 @@ WhimsyVariant::WhimsyVariant(const char *_cstr)
  * @brief String constructor. Makes this variant take the value of a string.
  * @param _cstr     Initializing value.
  */
-WhimsyVariant::WhimsyVariant(std::string _cstr)
+Variant::Variant(std::string _cstr)
 {
-    _data_type =            VariantType::String;
+    _data_type =            Type::String;
     _data.String =          new VDPointer<std::string>(std::string(_cstr));
     //_data.String =          new std::string(_cstr);
 }
@@ -104,10 +110,10 @@ WhimsyVariant::WhimsyVariant(std::string _cstr)
  * @brief Array constructor. Makes this variant take the value of a dynamic array.
  * @param _array    Initializing value.
  */
-WhimsyVariant::WhimsyVariant(std::vector<WhimsyVariant> _array)
+Variant::Variant(std::vector<Variant> _array)
 {
-    _data_type =            VariantType::VariantArray;
-    _data.VariantArray =    new VDPointer<std::vector<WhimsyVariant>>(_array);
+    _data_type =            Type::VariantArray;
+    _data.VariantArray =    new VDPointer<std::vector<Variant>>(_array);
     //_data.VariantArray =    new std::vector<WhimsyVariant>(_array);
 }
 
@@ -116,7 +122,7 @@ WhimsyVariant::WhimsyVariant(std::vector<WhimsyVariant> _array)
  * @param wref
  * @return
  */
-WhimsyVariant& WhimsyVariant::operator=(const WhimsyVariant& wref)
+Variant& Variant::operator=(const Variant& wref)
 {
     if(isUsingExtraMemory())
         _data.GenericPointer->dereference();
@@ -135,7 +141,7 @@ WhimsyVariant& WhimsyVariant::operator=(const WhimsyVariant& wref)
  * @brief Returns the type of this Variant, in a convenient string format.
  * @return
  */
-const char* WhimsyVariant::type() const
+const char* Variant::type() const
 {
     return typeToString(_data_type);
 }
@@ -144,40 +150,40 @@ const char* WhimsyVariant::type() const
  * @brief Returns the Type ID of this Variant.
  * @return
  */
-WhimsyVariant::VariantType WhimsyVariant::typeID() const
+Variant::Type Variant::typeID() const
 {
     return _data_type;
 }
 
-const char* WhimsyVariant::typeToString(WhimsyVariant::VariantType t)
+const char* Variant::typeToString(Variant::Type t)
 {
     switch(t)
     {
-        case VariantType::Null:
+        case Type::Null:
             return "null";
-        case VariantType::Bool:
+        case Type::Bool:
             return "bool";
-        case VariantType::Nibble:
+        case Type::Nibble:
             return "nibble";
-        case VariantType::Byte:
+        case Type::Byte:
             return "byte";
-        case VariantType::Word:
+        case Type::Word:
             return "word";
-        case VariantType::Integer:
+        case Type::Integer:
             return "int";
-        case VariantType::Float:
+        case Type::Float:
             return "float";
-        case VariantType::Double:
+        case Type::Double:
             return "double";
-        case VariantType::Long:
+        case Type::Long:
             return "long";
-        case VariantType::Note:
+        case Type::Note:
             return "note";
-        case VariantType::String:
+        case Type::String:
             return "string";
-        case VariantType::VariantArray:
+        case Type::VariantArray:
             return "array";
-        case VariantType::GenericPointer:
+        case Type::GenericPointer:
             return "pointer";
         default:
             return "unknown";
@@ -190,12 +196,12 @@ const char* WhimsyVariant::typeToString(WhimsyVariant::VariantType t)
  * @brief Tells whether this variant holds a null value or not.
  * @return
  */
-bool WhimsyVariant::isNull() const
+bool Variant::isNull() const
 {
-    return (_data_type == VariantType::Null);
+    return (_data_type == Type::Null);
 }
 
-WhimsyVariant& WhimsyVariant::convertTo(WhimsyVariant::VariantType t)
+Variant& Variant::convert(Variant::Type t)
 {
     long long int   inumber;
     double          dnumber;
@@ -215,106 +221,104 @@ WhimsyVariant& WhimsyVariant::convertTo(WhimsyVariant::VariantType t)
     return *this;
 }
 
-bool WhimsyVariant::boolValue() const
+bool Variant::boolValue() const
 {
     return _data.Bool;
 }
 
-unsigned char WhimsyVariant::nibbleValue() const
+unsigned char Variant::nibbleValue() const
 {
     return _data.Byte & 15;
 }
 
-unsigned char WhimsyVariant::byteValue() const
+unsigned char Variant::byteValue() const
 {
     return _data.Byte;
 }
 
-unsigned short int WhimsyVariant::wordValue() const
+unsigned short int Variant::wordValue() const
 {
     return _data.Word;
 }
 
-int WhimsyVariant::intValue() const
+int Variant::intValue() const
 {
     return _data.Integer;
 }
 
-long long WhimsyVariant::longValue() const
+long long Variant::longValue() const
 {
     return _data.Long;
 }
 
-float WhimsyVariant::floatValue() const
+float Variant::floatValue() const
 {
     return _data.Float;
 }
 
-double WhimsyVariant::doubleValue() const
+double Variant::doubleValue() const
 {
     return _data.Double;
 }
 
-WhimsyNote WhimsyVariant::noteValue() const
+whimsycore::Note Variant::noteValue() const
 {
-    return WhimsyNote(static_cast<WhimsyNote>(_data.Note));
+    return whimsycore::Note(static_cast<whimsycore::Note>(_data.Note));
 }
 
-std::string WhimsyVariant::stringValue() const
+std::string Variant::stringValue() const
 {
     //_data.String->reference();
     return std::string(*(_data.String->_data));
 }
 
-std::vector<WhimsyVariant> WhimsyVariant::arrayValue() const
+std::vector<Variant> Variant::arrayValue() const
 {
     //_data.VariantArray->reference();
-    return std::vector<WhimsyVariant>(*(_data.VariantArray->_data));
+    return std::vector<Variant>(*(_data.VariantArray->_data));
 }
 
-bool WhimsyVariant::isUsingExtraMemory() const
+bool Variant::isUsingExtraMemory() const
 {
-    if(_data_type == VariantType::String ||
-            _data_type == VariantType::VariantArray ||
-            _data_type == VariantType::GenericPointer)
-        return true;
-    else
-        return false;
+    return typeUsesExtraMemory(_data_type);
 }
 
-std::string WhimsyVariant::toString() const
+std::string Variant::toString() const
 {
     std::ostringstream retval;
-    std::vector<WhimsyVariant>::iterator it;
-    std::vector<WhimsyVariant>::iterator almost_end;
+    std::vector<Variant>::iterator it;
+    std::vector<Variant>::iterator almost_end;
 
     switch(_data_type)
     {
-        case VariantType::Null:
+        case Type::Null:
             retval <<   "-";
         break;
-        case VariantType::Bool:
+        case Type::Bool:
             retval <<   (_data.Bool ? "true" : "false");
         break;
-        case VariantType::Integer:
+        case Type::Nibble:
+        case Type::Byte:
+        case Type::Word:
+        case Type::Integer:
             retval <<   _data.Integer;
         break;
-        case VariantType::Long:
+        case Type::Long:
             retval <<   _data.Long;
         break;
-        case VariantType::Float:
+        case Type::Float:
             retval <<   _data.Float;
         break;
-        case VariantType::Double:
+        case Type::Double:
             retval <<   _data.Double;
         break;
-        case VariantType::Note:
+        case Type::Note:
             retval <<   _data.Note.toString();
         break;
-        case VariantType::String:
+        case Type::String:
             retval <<   *(_data.String->_data);
         break;
-        case VariantType::VariantArray:
+        case Type::VariantArray:
             almost_end = _data.VariantArray->_data->end() - 1;
 
             retval << "[";
@@ -329,10 +333,112 @@ std::string WhimsyVariant::toString() const
     return retval.str();
 }
 
+std::string Variant::toString(OutputStringFormat ot) const
+{
+    std::ostringstream retval;
+    std::vector<Variant>::iterator it;
+    std::vector<Variant>::iterator almost_end;
+
+    if(ot == Format_Normal)
+        return toString();
+    else if(ot == Format_Hex)
+    {
+        switch(_data_type)
+        {
+            // Null, Note and String -> No changes.
+            case Type::Null:
+            case Type::Note:
+            case Type::String:
+                return toString();
+
+            // Floating types have now 4 precision points.
+            case Type::Float:
+                retval.precision(4);
+                retval << _data.Float;
+            break;
+            case Type::Double:
+                retval.precision(4);
+                retval << _data.Double;
+            break;
+
+            // Integer types are converted to hex and padded as necessary.
+            case Type::Bool:
+                retval <<   (_data.Bool ? "1" : "0");
+            break;
+            case Type::Nibble:
+                retval << std::hex << (_data.Byte & 15);
+            break;
+            case Type::Byte:
+                retval << std::setfill('0') << std::setw(2) << std::hex << _data.Byte;
+            break;
+            case Type::Word:
+                retval << std::setfill('0') << std::setw(4) << std::hex << _data.Word;
+            break;
+            case Type::Integer:
+                retval << std::setfill('0') << std::setw(8) << std::hex << _data.Integer;
+            break;
+            case Type::Long:
+                retval << std::setfill('0') << std::setw(16) << std::hex << _data.Long;
+            break;
+
+            // Array recurses this function into each element.
+            case Type::VariantArray:
+                almost_end = _data.VariantArray->_data->end() - 1;
+
+                retval << "[";
+                for(it = _data.VariantArray->_data->begin(); it != _data.VariantArray->_data->end(); it++)
+                    retval <<   it->toString(ot) << ((it != almost_end) ? ", " : "");
+
+                retval << "]";
+            break;
+            default:
+                retval << "unknown";
+        }
+    }
+    return retval.str();
+}
+
+static bool Variant::typeUsesExtraMemory(Type t)
+{
+    if(t == Type::String ||
+            t == Type::VariantArray ||
+            t == Type::GenericPointer)
+        return true;
+    else
+        return false;
+}
+
+static bool Variant::typeIsNumeric(Type t)
+{
+    return (typeIsInteger(t) || typeIsFloatingPoint(t));
+}
+
+static bool Variant::typeIsInteger(Type t)
+{
+    if(t == Type::Bool ||
+            t == Type::Nibble ||
+            t == Type::Byte ||
+            t == Type::Word ||
+            t == Type::Integer ||
+            t == Type::Long)
+        return true;
+    else
+        return false;
+}
+
+static bool Variant::typeIsFloatingPoint(Type t)
+{
+    if(t == Type::Float ||
+            t == Type::Double)
+        return true;
+    else
+        return false;
+}
+
 /**
  * @brief Destructor. Frees memory if this is a pointer.
  */
-WhimsyVariant::~WhimsyVariant()
+Variant::~Variant()
 {
     if(isUsingExtraMemory())
         _data.GenericPointer->dereference();

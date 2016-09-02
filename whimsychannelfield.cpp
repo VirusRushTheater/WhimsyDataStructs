@@ -3,35 +3,37 @@
 #include "whimsychannelfield.h"
 #include "whimsyexception.h"
 
-WhimsyVariant& WhimsyChannelField::at(unsigned int pos)
+using namespace whimsycore;
+
+Variant& ChannelField::at(unsigned int pos)
 {
     if(pos >= _data.size())
-        throw(WhimsyException(this, WhimsyException::ArrayOutOfBounds, "Method at()"));
+        throw(Exception(this, Exception::ArrayOutOfBounds, "Method at()"));
 
     return _data.at(pos);
 }
 
-WhimsyVariant& WhimsyChannelField::operator [](unsigned int pos)
+Variant& ChannelField::operator [](unsigned int pos)
 {
     return at(pos);
 }
 
-WhimsyChannelField& WhimsyChannelField::append(const WhimsyVariant& data)
+ChannelField& ChannelField::append(const Variant& data)
 {
     _data.push_back(data);
     return *this;
 }
 
-WhimsyChannelField& WhimsyChannelField::operator <<(const WhimsyVariant& data)
+ChannelField& ChannelField::operator <<(const Variant& data)
 {
     return append(data);
 }
 
-WhimsyChannelField& WhimsyChannelField::remove(int index)
+ChannelField& ChannelField::remove(int index)
 {
     int datasize = _data.size();
     if(index >= datasize || index < -datasize)
-        throw(WhimsyException(this, WhimsyException::ArrayOutOfBounds, "Method remove()"));
+        throw(Exception(this, Exception::ArrayOutOfBounds, "Method remove()"));
 
     if(index >= 0)
         _data.erase(_data.begin() + index);
@@ -40,28 +42,49 @@ WhimsyChannelField& WhimsyChannelField::remove(int index)
     return *this;
 }
 
-WhimsyChannelField& WhimsyChannelField::removeLast()
+ChannelField& ChannelField::removeLast()
 {
     _data.erase(_data.end() - 1);
     return *this;
 }
 
-WhimsyChannelField& WhimsyChannelField::insert(const WhimsyVariant& data, unsigned int pos)
+ChannelField& ChannelField::insert(const Variant& data, unsigned int pos)
 {
     if(pos > _data.size())
-        throw(WhimsyException(this, WhimsyException::ArrayOutOfBounds, "Method insert()"));
+        throw(Exception(this, Exception::ArrayOutOfBounds, "Method insert()"));
 
     _data.insert(_data.begin() + pos, data);
     return *this;
 }
 
-std::string WhimsyChannelField::toString() const
+
+Variant::Type ChannelField::type() const
+{
+    return _type;
+}
+
+const char* ChannelField::typeName() const
+{
+    return Variant::typeToString(_type);
+}
+
+std::string ChannelField::name() const
+{
+    return std::string(_name);
+}
+
+void ChannelField::setName(std::string nm)
+{
+    _name = nm;
+}
+
+std::string ChannelField::toString() const
 {
     std::ostringstream retval;
-    std::vector<WhimsyVariant>::const_iterator it =           _data.begin();
-    std::vector<WhimsyVariant>::const_iterator almost_end =   _data.end() - 1;
+    std::vector<Variant>::const_iterator it =           _data.begin();
+    std::vector<Variant>::const_iterator almost_end =   _data.end() - 1;
 
-    retval << "WhimsyChannelField \"" << _name << "\" [" << WhimsyVariant::typeToString(_type) << "] -> [";
+    retval << "WhimsyChannelField \"" << _name << "\" [" << Variant::typeToString(_type) << "] -> [";
 
     for(; it != _data.end(); it++)
     {

@@ -1,41 +1,24 @@
-#include "ChannelField.h"
-
-#include "whimsyexception.h"
-#include "whimsyvariant.h"
-#include "whimsynote.h"
-#include "whimsychannelfield.h"
+#include "whimsycore.h"
 
 #include <iostream>
 
-using namespace whimsy;
+using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    //throw WhimsyException("Test purposes, no bully!");
+    Channel     testch;
+    Note        qn = "C4";
 
-    WhimsyChannelField  wchf(WhimsyVariant::Note, "Notes");
-    wchf << WhimsyNote("G-5");
+    testch.addField(Variant::Note, "pitch");
+    testch.addField(Variant::Byte, "instrument");
+    testch.addField(Variant::Byte, "don't know");
 
-    WhimsyVariant wena;
+    //testch.removeField("don't know");
 
-    /*
-    Channel             testch;
-
-    testch.addField(Note_field, "pitch");
-    testch.addField(Byte_field, "instrument");
-    testch.addField(Byte_field, "don't know");
-    testch.addField(Nibble_field, "volume");
-
-    testch.removeField("don't know");
-
-    testch._fields[0] << "C-3" << "-" << "A-4" << WHIMSYDATA_NULL;
-    testch._fields[1] << "0x0C" << "-" << "-" << "-";
-    testch._fields[2] << "0xF" << "-" << "-" << "-";
-    */
-
-    std::cout << wchf << std::endl;
-
-    //std::cout << std::endl << "WhimsyChannelField test: " << wchf[2] << std::endl;
+    testch._fields[0] << Note("C-3") << "-" << Note("A-4") << Variant::null;
+    testch._fields[1] << 12 << Variant::null << Variant::null << Variant::null;
+    testch._fields[2] << 15 << Variant::null << Variant::null << Variant::null;
+    std::cout << testch << std::endl;
 
     return 0;
 }

@@ -1,5 +1,4 @@
-#ifndef WHIMSYVARIANT_H
-#define WHIMSYVARIANT_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -11,10 +10,13 @@
 
 typedef uint64_t    FlagType;
 
-class WhimsyVariant : public WhimsyBase
+namespace whimsycore
+{
+
+class Variant : public Base
 {
 public:
-    enum VariantType
+    enum Type
     {
         Null,
         Bool,
@@ -29,6 +31,12 @@ public:
         String,
         VariantArray,
         GenericPointer
+    };
+
+    enum OutputStringFormat
+    {
+        Format_Normal,
+        Format_Hex
     };
 
     template<class T>
@@ -69,36 +77,38 @@ public:
         float                                   Float;
         double                                  Double;
         long long                               Long;
-        WhimsyNoteProto                         Note;
+        NoteProto                               Note;
         VDPointer<std::string>*                 String;
-        VDPointer<std::vector<WhimsyVariant>>*  VariantArray;
+        VDPointer<std::vector<Variant>>*        VariantArray;
         VDPointer<char>*                        GenericPointer;
     };
 
     WHIMSY_OBJECT_NAME("WhimsyVariant")
 
-    WhimsyVariant();
-    WhimsyVariant(const WhimsyVariant& wref);
-    WhimsyVariant(bool _bool);
-    WhimsyVariant(int _int);
-    WhimsyVariant(long long _long);
-    WhimsyVariant(float _float);
-    WhimsyVariant(double _double);
-    WhimsyVariant(WhimsyNote _note);
-    WhimsyVariant(const char* _cstr);
-    WhimsyVariant(std::string _cstr);
-    WhimsyVariant(std::vector<WhimsyVariant> _array);
+    static const Variant     null;
 
-    WhimsyVariant&                  operator=(const WhimsyVariant& wref);
+    Variant();
+    Variant(const Variant& wref);
+    Variant(bool _bool);
+    Variant(int _int);
+    Variant(long long _long);
+    Variant(float _float);
+    Variant(double _double);
+    Variant(whimsycore::Note _note);
+    Variant(const char* _cstr);
+    Variant(std::string _cstr);
+    Variant(std::vector<Variant> _array);
+
+    Variant&                        operator=(const Variant& wref);
 
     const char*                     type() const;
-    WhimsyVariant::VariantType      typeID() const;
+    Variant::Type                   typeID() const;
 
-    static const char*              typeToString(WhimsyVariant::VariantType t);
+    static const char*              typeToString(Variant::Type t);
 
     bool                            isNull() const;
 
-    WhimsyVariant&                  convertTo(WhimsyVariant::VariantType t);
+    Variant&                        convert(Variant::Type t);
 
     bool                            boolValue() const;
     unsigned char                   nibbleValue() const;
@@ -108,19 +118,25 @@ public:
     long long                       longValue() const;
     float                           floatValue() const;
     double                          doubleValue() const;
-    WhimsyNote                      noteValue() const;
+    whimsycore::Note                noteValue() const;
     std::string                     stringValue() const;
-    std::vector<WhimsyVariant>      arrayValue() const;
+    std::vector<Variant>            arrayValue() const;
 
     std::string                     toString() const;
+    std::string                     toString(OutputStringFormat ot) const;
 
-    ~WhimsyVariant();
+    static bool                     typeUsesExtraMemory(Type t);
+    static bool                     typeIsNumeric(Type t);
+    static bool                     typeIsInteger(Type t);
+    static bool                     typeIsFloatingPoint(Type t);
+
+    ~Variant();
 
 private:
-    VariantType         _data_type;
+    Type                _data_type;
     VariantData         _data;
 
-    bool isUsingExtraMemory() const;
+    bool                            isUsingExtraMemory() const;
 };
+}
 
-#endif // WHIMSYVARIANT_H

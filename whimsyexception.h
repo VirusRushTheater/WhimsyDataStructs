@@ -1,5 +1,4 @@
-#ifndef WHIMSYEXCEPTION_H
-#define WHIMSYEXCEPTION_H
+#pragma once
 
 #include "whimsybase.h"
 
@@ -8,7 +7,9 @@
 #include <exception>
 #include <cstring>
 
-class WhimsyException : public std::exception, public WhimsyBase
+namespace whimsycore
+{
+class Exception : public std::exception, public Base
 {   
 public:
     enum ExceptionType
@@ -16,12 +17,14 @@ public:
         Unknown,
         TestPurposes,
         ArrayOutOfBounds,
-        InvalidConversion
+        InvalidConversion,
+        NameConflict,
+        NotFound
     };
 
 private:
     bool            _identifiable;
-    WhimsyBase*     _cause;
+    Base*     _cause;
     ExceptionType   _xctype;
 
     bool            _uses_additional_info;
@@ -29,17 +32,16 @@ private:
 
 public:
     WHIMSY_OBJECT_NAME("WhimsyException")
-    WhimsyException(const char* info = "");
-    WhimsyException(WhimsyBase* objref, ExceptionType reasons = ExceptionType::Unknown, const char* info = "");
+    Exception(const char* info = "");
+    Exception(Base* objref, ExceptionType reasons = ExceptionType::Unknown, const char* info = "");
 
     std::string toString() const;
 
-    WhimsyBase* cause() const;
+    Base* cause() const;
     ExceptionType reasons() const;
 
     virtual const char* what() const throw();
 
     static const char* exceptionTypeToString(ExceptionType t);
 };
-
-#endif // WHIMSYEXCEPTION_H
+}
