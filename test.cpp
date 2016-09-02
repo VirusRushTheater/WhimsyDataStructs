@@ -8,6 +8,8 @@ int main(int argc, char** argv)
 {
     Channel     testch;
     Note        qn = "C4";
+    Variant     vn = 36;
+    std::cout << vn.convert(Variant::VariantArray).convert(Variant::String);
 
     testch.addField(Variant::Note, "pitch");
     testch.addField(Variant::Byte, "instrument");

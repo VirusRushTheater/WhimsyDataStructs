@@ -24,7 +24,7 @@ public:
 
 private:
     bool            _identifiable;
-    Base*     _cause;
+    const Base*     _cause;
     ExceptionType   _xctype;
 
     bool            _uses_additional_info;
@@ -33,7 +33,7 @@ private:
 public:
     WHIMSY_OBJECT_NAME("WhimsyException")
     Exception(const char* info = "");
-    Exception(Base* objref, ExceptionType reasons = ExceptionType::Unknown, const char* info = "");
+    Exception(const Base* objref, ExceptionType reasons = ExceptionType::Unknown, const char* info = "");
 
     std::string toString() const;
 

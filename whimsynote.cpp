@@ -90,7 +90,12 @@ std::string NoteProto::toString() const
     return retstream.str();
 }
 
-unsigned char& NoteProto::value()
+unsigned char NoteProto::value() const
+{
+    return _notedata;
+}
+
+unsigned char& NoteProto::ref()
 {
     return _notedata;
 }

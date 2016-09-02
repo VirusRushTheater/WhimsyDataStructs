@@ -25,7 +25,8 @@ public:
     void fromString(const char* note);
     void fromString(std::string note);
 
-    unsigned char&  value();
+    unsigned char   value() const;
+    unsigned char&  ref();
     std::string     toString() const;
     int             toInt() const;
 

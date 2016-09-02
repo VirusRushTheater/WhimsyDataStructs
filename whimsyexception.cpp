@@ -14,7 +14,7 @@ Exception::Exception(const char* info) :
         _uses_additional_info = false;
 }
 
-Exception::Exception(Base* objref, ExceptionType reasons, const char* info) :
+Exception::Exception(const Base* objref, ExceptionType reasons, const char* info) :
     _identifiable(true),
     _cause(objref),
     _xctype(reasons),

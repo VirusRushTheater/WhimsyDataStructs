@@ -70,17 +70,17 @@ public:
 
     union VariantData
     {
-        bool                                    Bool;
-        unsigned char                           Byte;
-        unsigned short int                      Word;
-        int                                     Integer;
-        float                                   Float;
-        double                                  Double;
-        long long                               Long;
-        NoteProto                               Note;
-        VDPointer<std::string>*                 String;
-        VDPointer<std::vector<Variant>>*        VariantArray;
-        VDPointer<char>*                        GenericPointer;
+        bool                                    _Bool;
+        unsigned char                           _Byte;
+        unsigned short int                      _Word;
+        int                                     _Integer;
+        float                                   _Float;
+        double                                  _Double;
+        long long                               _Long;
+        NoteProto                               _Note;
+        VDPointer<std::string>*                 _String;
+        VDPointer<std::vector<Variant>>*        _VariantArray;
+        VDPointer<char>*                        _Pointer;
     };
 
     WHIMSY_OBJECT_NAME("WhimsyVariant")
@@ -115,7 +115,7 @@ public:
     unsigned char                   byteValue() const;
     unsigned short int              wordValue() const;
     int                             intValue() const;
-    long long                       longValue() const;
+    long long int                   longValue() const;
     float                           floatValue() const;
     double                          doubleValue() const;
     whimsycore::Note                noteValue() const;
