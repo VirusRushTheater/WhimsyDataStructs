@@ -9,6 +9,7 @@
 
 namespace whimsycore
 {
+
 class Exception : public std::exception, public Base
 {   
 public:
@@ -19,6 +20,7 @@ public:
         ArrayOutOfBounds,
         InvalidConversion,
         NameConflict,
+        NotImplemented,
         NotFound
     };
 

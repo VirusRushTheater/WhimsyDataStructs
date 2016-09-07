@@ -4,6 +4,8 @@
 #include <sstream>
 #include <iomanip>
 
+#define WHIMSYVARIANT_CLEAR       _data_type = Null; _data._Long = 0ll;
+
 using namespace whimsycore;
 
 const Variant Variant::null = Variant();
@@ -83,6 +85,7 @@ Variant::Variant(whimsycore::Note _note)
 {
     _data_type =            Type::Note;
     _data._Note =            _note;
+    noteFix();
 }
 
 /**
@@ -114,7 +117,7 @@ Variant::Variant(std::string _cstr)
 Variant::Variant(std::vector<Variant> _array)
 {
     _data_type =            Type::VariantArray;
-    _data._VariantArray =    new VDPointer<std::vector<Variant>>(_array);
+    _data._VariantArray =    new VDPointer<std::vector<Variant> >(_array);
     //_data.VariantArray =    new std::vector<WhimsyVariant>(_array);
 }
 
@@ -201,6 +204,67 @@ bool Variant::isNull() const
 {
     return (_data_type == Type::Null);
 }
+
+#if WHIMSYVARIANT_ENABLE_TYPE_CASTING == 1
+template<typename T> T Variant::value() const
+{
+    throw Exception(this, Exception::InvalidConversion, "Cannot cast to this type.");
+    return T();
+}
+
+namespace whimsycore
+{
+template<> bool Variant::value<bool>() const
+{
+    return boolValue();
+}
+
+template<> unsigned char Variant::value<unsigned char>() const
+{
+    return byteValue();
+}
+
+template<> unsigned short int Variant::value<unsigned short int>() const
+{
+    return wordValue();
+}
+
+template<> int Variant::value<int>() const
+{
+    return intValue();
+}
+
+template<> long long int Variant::value<long long int>() const
+{
+    return longValue();
+}
+
+template<> float Variant::value<float>() const
+{
+    return floatValue();
+}
+
+template<> double Variant::value<double>() const
+{
+    return doubleValue();
+}
+
+template<> whimsycore::Note Variant::value<whimsycore::Note>() const
+{
+    return noteValue();
+}
+
+template<> std::string Variant::value<std::string>() const
+{
+    return stringValue();
+}
+
+template<> std::vector<Variant> Variant::value<std::vector<Variant> >() const
+{
+    return arrayValue();
+}
+}
+#endif
 
 bool Variant::boolValue() const
 {
@@ -513,6 +577,8 @@ whimsycore::Note Variant::noteValue() const
 {
     if(_data_type == Note)
         return whimsycore::Note(_data._Note);
+    else if(_data_type == String)
+        return whimsycore::Note(*(_data._String->_data));
     else
         return whimsycore::Note(byteValue());
 }
@@ -564,6 +630,7 @@ std::string Variant::stringValue() const
         default:
             retval << "unknown";
     }
+
     return retval.str();
 }
 
@@ -715,7 +782,7 @@ Variant& Variant::convert(Variant::Type t)
     Variant             rval;
 
     // Dismiss if no conversion.
-    if(t == _data_type)
+    if(t == _data_type || _data_type == Null)
         return *this;
 
     // Any type -> Null type = Nullify (and remove extra memory if necessary)
@@ -723,6 +790,7 @@ Variant& Variant::convert(Variant::Type t)
     {
         _data_type = Null;
     }
+
     // Any type -> Generic Pointer = What.
     if(t == GenericPointer)
     {
@@ -731,7 +799,7 @@ Variant& Variant::convert(Variant::Type t)
 
     switch(t)
     {
-        case Null: break;
+        case Null:      break;
         case Bool:      rval = boolValue();     break;
         case Nibble:    rval = nibbleValue();   break;
         case Byte:      rval = byteValue();     break;
@@ -751,8 +819,19 @@ Variant& Variant::convert(Variant::Type t)
         _data._Pointer->dereference();
         */
     *this =         rval;
-    _data_type =    t;
+    if(rval._data_type != Null)
+        _data_type =    t;
 
     return *this;
 }
 
+void Variant::noteFix()
+{
+    if(_data_type == Note)
+    {
+        if(_data._Note.isNull())
+        {
+            WHIMSYVARIANT_CLEAR
+        }
+    }
+}

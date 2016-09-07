@@ -11,11 +11,16 @@
 
 namespace whimsycore
 {
+
+class ChannelRow;
+
 class Channel : public Base
 {
+    friend class ChannelRow;
+
 public:
     std::deque<ChannelField>      _fields;
-    std::map<std::string, int>          _name_map;
+    std::map<std::string, int>    _name_map;
 
 public:
     WHIMSY_OBJECT_NAME("WhimsyChannel")

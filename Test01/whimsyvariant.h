@@ -8,6 +8,8 @@
 #include "whimsynote.h"
 #include "whimsybase.h"
 
+#define WHIMSYVARIANT_ENABLE_TYPE_CASTING      1
+
 typedef uint64_t    FlagType;
 
 namespace whimsycore
@@ -79,7 +81,7 @@ public:
         long long                               _Long;
         NoteProto                               _Note;
         VDPointer<std::string>*                 _String;
-        VDPointer<std::vector<Variant>>*        _VariantArray;
+        VDPointer<std::vector<Variant> >*       _VariantArray;
         VDPointer<char>*                        _Pointer;
     };
 
@@ -122,6 +124,11 @@ public:
     std::string                     stringValue() const;
     std::vector<Variant>            arrayValue() const;
 
+#if WHIMSYVARIANT_ENABLE_TYPE_CASTING == 1
+    template<typename T>            operator T(){return value<T>();}
+    template<typename T> T          value() const;
+#endif
+
     std::string                     toString() const;
     std::string                     toString(OutputStringFormat ot) const;
 
@@ -137,6 +144,7 @@ private:
     VariantData         _data;
 
     bool                            isUsingExtraMemory() const;
+    void                            noteFix();
 };
 }
 

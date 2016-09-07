@@ -18,13 +18,13 @@ Variant& ChannelField::operator [](unsigned int pos)
     return at(pos);
 }
 
-ChannelField& ChannelField::append(const Variant& data)
+ChannelField& ChannelField::append(Variant data)
 {
-    _data.push_back(data);
+    _data.push_back(data.convert(_type));
     return *this;
 }
 
-ChannelField& ChannelField::operator <<(const Variant& data)
+ChannelField& ChannelField::operator <<(Variant data)
 {
     return append(data);
 }
@@ -46,6 +46,22 @@ ChannelField& ChannelField::removeLast()
 {
     _data.erase(_data.end() - 1);
     return *this;
+}
+
+void ChannelField::resize(unsigned int newsize)
+{
+    if(_data.size() == newsize)
+        return;
+    // Reduce size -> Remove last elements.
+    else if(_data.size() > newsize)
+    {
+        _data.erase(_data.end() - (_data.size() - newsize), _data.end());
+    }
+    // Increase size -> Add null elements.
+    else //_data.size() < newsize
+    {
+        _data.insert(_data.end(), (newsize - _data.size()), Variant::null);
+    }
 }
 
 ChannelField& ChannelField::insert(const Variant& data, unsigned int pos)
