@@ -1,5 +1,6 @@
 #pragma once
 
-#include "whimsybase.h"
-#include "whimsyvariant.h"
-#include "whimsynote.h"
+#include "core/whimsyexception.h"
+#include "core/whimsybase.h"
+#include "core/whimsyvariant.h"
+#include "core/whimsynote.h"
