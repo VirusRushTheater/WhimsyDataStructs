@@ -159,6 +159,11 @@ Variant::Type Variant::typeID() const
     return data_type;
 }
 
+/**
+ * @brief Returns the name of the given type ID as a character string.
+ * @param t     Type ID
+ * @return
+ */
 const char* Variant::typeToString(Variant::Type t)
 {
     switch(t)
@@ -187,6 +192,8 @@ const char* Variant::typeToString(Variant::Type t)
             return "string";
         case Type::VariantArray:
             return "array";
+        case Type::Effect:
+            return "effect";
         case Type::GenericPointer:
             return "pointer";
         default:
@@ -205,7 +212,9 @@ bool Variant::isNull() const
     return (data_type == Type::Null);
 }
 
-#if WHIMSYVARIANT_ENABLE_TYPE_CASTING == 1
+/**
+ * @brief Returns the value of the Variant, in the given format.
+ */
 template<typename T> T Variant::value() const
 {
     throw Exception(this, Exception::InvalidConversion, "Cannot cast to this type.");
@@ -264,8 +273,10 @@ template<> std::vector<Variant> Variant::value<std::vector<Variant> >() const
     return arrayValue();
 }
 }
-#endif
 
+/**
+ * @brief Returns the bool equivalent of this variable's value.
+ */
 bool Variant::boolValue() const
 {
     if(data_type == Bool)
@@ -295,6 +306,7 @@ bool Variant::boolValue() const
             return (strcasecmp(data_._String->_data->c_str(), "true") == 0 ||
                     strcmp(data_._String->_data->c_str(), "1") == 0);
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
             {
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Bool.");
@@ -307,6 +319,9 @@ bool Variant::boolValue() const
     }
 }
 
+/**
+ * @brief Returns the nibble equivalent of this variable's value.
+ */
 unsigned char Variant::nibbleValue() const
 {
     if(data_type == Nibble)
@@ -336,6 +351,7 @@ unsigned char Variant::nibbleValue() const
         case String:
             return Variant((int) strtol(data_._String->_data->c_str(), NULL, 10)).nibbleValue();
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
             {
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Nibble.");
@@ -348,6 +364,9 @@ unsigned char Variant::nibbleValue() const
     }
 }
 
+/**
+ * @brief Returns the byte equivalent of this variable's value.
+ */
 unsigned char Variant::byteValue() const
 {
     if(data_type == Byte || data_type == Nibble)
@@ -376,6 +395,7 @@ unsigned char Variant::byteValue() const
         case String:
             return static_cast<unsigned char>(strtol(data_._String->_data->c_str(), NULL, 10));
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
             {
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Byte.");
@@ -388,6 +408,9 @@ unsigned char Variant::byteValue() const
     }
 }
 
+/**
+ * @brief Returns the word equivalent of this variable's value.
+ */
 unsigned short int Variant::wordValue() const
 {
     if(data_type == Word)
@@ -416,6 +439,7 @@ unsigned short int Variant::wordValue() const
         case String:
             return static_cast<unsigned short int>(strtol(data_._String->_data->c_str(), NULL, 10));
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Word.");
             return data_._VariantArray->_data->at(0).wordValue();
@@ -425,6 +449,9 @@ unsigned short int Variant::wordValue() const
     }
 }
 
+/**
+ * @brief Returns the integer (double word) equivalent of this variable's value.
+ */
 int Variant::intValue() const
 {
     if(data_type == Integer)
@@ -453,6 +480,7 @@ int Variant::intValue() const
         case String:
             return static_cast<int>(strtol(data_._String->_data->c_str(), NULL, 10));
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Integer.");
             return data_._VariantArray->_data->at(0).intValue();
@@ -462,6 +490,9 @@ int Variant::intValue() const
     }
 }
 
+/**
+ * @brief Returns the long long (quad word) equivalent of this variable's value.
+ */
 long long int Variant::longValue() const
 {
     if(data_type == Long)
@@ -490,6 +521,7 @@ long long int Variant::longValue() const
         case String:
             return strtoll(data_._String->_data->c_str(), NULL, 10);
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Long.");
             return data_._VariantArray->_data->at(0).longValue();
@@ -499,6 +531,9 @@ long long int Variant::longValue() const
     }
 }
 
+/**
+ * @brief Returns the single-precision floating point number equivalent of this variable's value.
+ */
 float Variant::floatValue() const
 {
     if(data_type == Float)
@@ -527,6 +562,7 @@ float Variant::floatValue() const
         case String:
             return strtof(data_._String->_data->c_str(), NULL);
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Float.");
             return data_._VariantArray->_data->at(0).floatValue();
@@ -536,6 +572,9 @@ float Variant::floatValue() const
     }
 }
 
+/**
+ * @brief Returns the double-precision floating point number equivalent of this variable's value.
+ */
 double Variant::doubleValue() const
 {
     if(data_type == Double)
@@ -564,6 +603,7 @@ double Variant::doubleValue() const
         case String:
             return strtod(data_._String->_data->c_str(), NULL);
         case VariantArray:
+        case Effect:
             if(data_._VariantArray->_data->size() < 1)
                 throw Exception(this, Exception::InvalidConversion, "Variant currently an empty array. Can't convert to Double.");
             return data_._VariantArray->_data->at(0).doubleValue();
@@ -573,6 +613,9 @@ double Variant::doubleValue() const
     }
 }
 
+/**
+ * @brief Returns the Note equivalent of this variable's value.
+ */
 whimsycore::Note Variant::noteValue() const
 {
     if(data_type == Note)
@@ -583,6 +626,9 @@ whimsycore::Note Variant::noteValue() const
         return whimsycore::Note(byteValue());
 }
 
+/**
+ * @brief Returns the String equivalent of this variable's value.
+ */
 std::string Variant::stringValue() const
 {
     std::ostringstream retval;
@@ -627,6 +673,9 @@ std::string Variant::stringValue() const
 
             retval << "]";
         break;
+        case Effect:
+            // ---------------------------------------> Not yet implemented!
+        break;
         default:
             retval << "unknown";
     }
@@ -634,10 +683,13 @@ std::string Variant::stringValue() const
     return retval.str();
 }
 
+/**
+ * @brief Returns the Variant std::vector equivalent of this variable's value.
+ */
 std::vector<Variant> Variant::arrayValue() const
 {
     std::vector<Variant> retval;
-    if(data_type == VariantArray)
+    if(data_type == VariantArray || data_type == Effect)
         retval = std::vector<Variant>(*(data_._VariantArray->_data));
     else
         retval.push_back(*this);
@@ -655,16 +707,28 @@ template<> T Variant::value() const
     return T();
 }
 */
+
+/**
+ * @brief Tells whether this Variant is using extra memory (i.e. a String or an Array)
+ */
 bool Variant::isUsingExtraMemory() const
 {
     return typeUsesExtraMemory(data_type);
 }
 
+/**
+ * @brief String representation of this Variant.
+ */
 std::string Variant::toString() const
 {
     return stringValue();
 }
 
+/**
+ * @brief String representation of this Variant.
+ * @param ot    Number representation. Use Variant::Format_Normal to return the decimal representation of this number. Variant::Format_Hex for a hexadecimal representation.
+ * @return
+ */
 std::string Variant::toString(OutputStringFormat ot) const
 {
     std::ostringstream retval;
@@ -723,6 +787,9 @@ std::string Variant::toString(OutputStringFormat ot) const
 
                 retval << "]";
             break;
+            case Type::Effect:
+                // ---------------------------------------> Not yet implemented!
+            break;
             default:
                 retval << "unknown";
         }
@@ -734,6 +801,7 @@ bool Variant::typeUsesExtraMemory(Variant::Type t)
 {
     if(t == Type::String ||
             t == Type::VariantArray ||
+            t == Type::Effect ||
             t == Type::GenericPointer)
         return true;
     else
@@ -776,7 +844,11 @@ Variant::~Variant()
         data_._Pointer->dereference();
 }
 
-
+/**
+ * @brief Converts this Variant into a given type.
+ * @param t
+ * @return
+ */
 Variant& Variant::convert(Variant::Type t)
 {
     Variant             rval;
@@ -810,7 +882,8 @@ Variant& Variant::convert(Variant::Type t)
         case Double:    rval = doubleValue();   break;
         case Note:      rval = noteValue();     break;
         case String:    rval = stringValue();   break;
-        case VariantArray:  rval = arrayValue();    break;
+        case VariantArray:
+        case Effect:    rval = arrayValue();    break;
     default: break;
     }
 

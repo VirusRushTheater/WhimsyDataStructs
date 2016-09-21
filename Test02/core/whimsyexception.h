@@ -33,7 +33,7 @@ private:
     const char*     _additional_info;
 
 public:
-    WHIMSY_OBJECT_NAME("WhimsyException")
+    WHIMSY_OBJECT_NAME("Core/Exception")
     Exception(const char* info = "");
     Exception(const Base* objref, ExceptionType reasons = ExceptionType::Unknown, const char* info = "");
 

@@ -1,4 +1,4 @@
-set(RELEVANT_FOLDERS core .)
+set(RELEVANT_FOLDERS core system .)
 
 set(TEST02_SRC)
 

@@ -32,6 +32,7 @@ public:
         Note,
         String,
         VariantArray,
+        Effect,
         GenericPointer
     };
 
@@ -85,7 +86,7 @@ public:
         VDPointer<char>*                        _Pointer;
     };
 
-    WHIMSY_OBJECT_NAME("WhimsyVariant")
+    WHIMSY_OBJECT_NAME("Core/Variant")
 
     static const Variant            null;
 
@@ -124,10 +125,8 @@ public:
     std::string                     stringValue() const;
     std::vector<Variant>            arrayValue() const;
 
-#if WHIMSYVARIANT_ENABLE_TYPE_CASTING == 1
     template<typename T>            operator T(){return value<T>();}
     template<typename T> T          value() const;
-#endif
 
     std::string                     toString() const;
     std::string                     toString(OutputStringFormat ot) const;
@@ -139,7 +138,7 @@ public:
 
     ~Variant();
 
-private:
+protected:
     Type                data_type;
     VariantData         data_;
 

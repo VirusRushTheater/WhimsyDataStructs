@@ -42,7 +42,7 @@ public:
 class Note : public NoteProto, public Base
 {
 public:
-    WHIMSY_OBJECT_NAME("WhimsyNote")
+    WHIMSY_OBJECT_NAME("Core/Note")
 
     static const Note   null, stop, release;
 
