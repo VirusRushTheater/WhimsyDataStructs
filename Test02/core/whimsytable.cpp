@@ -54,6 +54,42 @@ void SoftTypedVector::update()
 
 // --------------------------------
 
+TypedTable& TypedTable::addFieldsVector(WhimsyVector<Variant::Type> types)
+{
+    size_t                                  vtypos;
+
+    for(vtypos = 0; vtypos < types.size(); vtypos++)
+    {
+        _cols.push_back(SoftTypedVector(types[vtypos]));
+        if(_height > 0)
+            _cols[vtypos].insert(_cols[vtypos].end(), _height, Variant::null);
+
+        _width++;
+    }
+
+    return *this;
+}
+
+TypedTable& TypedTable::addRowVector(WhimsyVector<Variant> datas)
+{
+    size_t                                  vitpos;
+    for(vitpos = 0; vitpos < datas.size() && vitpos < _width; vitpos++)
+    {
+        _cols[vitpos].push_back(datas[vitpos].convert(_cols[vitpos].type));
+        if(vitpos == _width)
+            break;
+    }
+
+    if(vitpos < _width)
+    {
+        for(; vitpos < _width; vitpos++)
+            _cols[vitpos].push_back(Variant::null);
+    }
+
+    _height++;
+    return *this;
+}
+
 std::string TypedTable::toString() const
 {
     std::ostringstream retval;

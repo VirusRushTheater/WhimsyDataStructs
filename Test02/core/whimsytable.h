@@ -28,7 +28,7 @@ struct SoftTypedVector : public WhimsyVector<Variant>
 
 class TypedTable : public Base
 {
-protected:
+private:
     unsigned int                    _width, _height;
     unsigned int                    _addrow_cursor;
     std::vector<Variant::Type>      _types;
@@ -40,51 +40,20 @@ public:
     TypedTable() : _width(0), _height(0), _addrow_cursor(0) {}
 
     template<typename ... Args>
-    void addFields(Variant::Type type, Args ... others)
+    void addFields(Args ... others)
     {
-        SoftTypedVector*    newcol;
-        SoftTypedVector     stv(type);
-
-        _cols.push_back(stv);
-
-        if(_height > 0)
-        {
-            newcol = &(_cols[_cols.size() - 1]);
-            newcol->insert(newcol->end(), _height, Variant::null);
-        }
-
-        _width++;
-        addFields(others...);
+        addFieldsVector(WhimsyVector<Variant::Type>(others...));
     }
-
-    void addFields()
-    {
-    }
-
 
     template<typename ... Args>
-    void addRow(Variant cell, Args ... others)
+    void addRow(Args ... others)
     {
-        _cols[_addrow_cursor++].push_back(cell);
-
-        if(_addrow_cursor == _width)
-            addRow();
-        else
-            addRow(others...);
+        addRowVector(WhimsyVector<Variant>(others...));
     }
 
-    void addRow()
-    {
-        if(_addrow_cursor < _width)
-        {
-            while(_addrow_cursor < _width)
-                _cols[_addrow_cursor++].push_back(Variant::null);
-        }
 
-        _height++;
-        _addrow_cursor = 0;
-    }
-
+    TypedTable& addFieldsVector(WhimsyVector<Variant::Type> types);
+    TypedTable& addRowVector(WhimsyVector<Variant> datas);
 
     std::string toString() const;
 };

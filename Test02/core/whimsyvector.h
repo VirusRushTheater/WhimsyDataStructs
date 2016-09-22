@@ -19,10 +19,15 @@ public:
 
     typedef std::vector<T> typeTvector;
 
-    template<typename ... Args>
-    WhimsyVector(Args ... variadicargs)
+    WhimsyVector()
     {
-        addItems(variadicargs...);
+
+    }
+
+    template<typename ... Args>
+    WhimsyVector(T firstarg, Args ... variadicargs)
+    {
+        addItems(firstarg, variadicargs...);
     }
 
     template<typename ... Args>
