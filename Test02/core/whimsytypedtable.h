@@ -11,6 +11,8 @@ namespace whimsycore
 
 class TypedTable;
 
+/**
+ */
 struct SoftTypedVector : public WhimsyVector<Variant>
 {
     friend class TypedTable;
@@ -54,6 +56,8 @@ public:
 
     TypedTable& addFieldsVector(WhimsyVector<Variant::Type> types);
     TypedTable& addRowVector(WhimsyVector<Variant> datas);
+
+    TypedTable& removeRow(size_t position);
 
     std::string toString() const;
 };

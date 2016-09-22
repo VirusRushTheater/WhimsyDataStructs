@@ -18,6 +18,8 @@ namespace whimsycore
 class Variant : public Base
 {
 public:
+    WHIMSY_OBJECT_NAME("Core/Variant")
+
     enum Type
     {
         Null,
@@ -85,8 +87,6 @@ public:
         VDPointer<std::vector<Variant> >*       _VariantArray;
         VDPointer<char>*                        _Pointer;
     };
-
-    WHIMSY_OBJECT_NAME("Core/Variant")
 
     static const Variant            null;
 

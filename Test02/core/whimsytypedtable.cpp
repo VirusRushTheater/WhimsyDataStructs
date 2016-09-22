@@ -1,5 +1,4 @@
-
-#include "whimsytable.h"
+#include "whimsytypedtable.h"
 
 using namespace whimsycore;
 
@@ -105,7 +104,7 @@ std::string TypedTable::toString() const
         {
             retval << _cols[i][j].toString(Variant::Format_Hex);
             if(i != _width - 1)
-                retval << "\t, ";
+                retval << "\t";
         }
         retval << "]";
 
@@ -115,4 +114,17 @@ std::string TypedTable::toString() const
     retval << "]";
 
     return retval.str();
+}
+
+TypedTable& TypedTable::removeRow(size_t position)
+{
+    if(position >= _height)
+        return *this;
+
+    for(unsigned int i = 0; i < _cols.size(); i++)
+        _cols[i].erase(_cols[i].begin() + position);
+
+    _height--;
+
+    return *this;
 }

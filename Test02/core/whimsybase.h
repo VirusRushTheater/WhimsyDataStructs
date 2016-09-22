@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-#define WHIMSY_OBJECT_NAME(A)     const char* className() const{return A;}
+#define WHIMSY_OBJECT_NAME(A)     const char* className() const {return A;}
 
 typedef unsigned char       byte;
 
