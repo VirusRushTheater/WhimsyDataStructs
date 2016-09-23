@@ -28,3 +28,4 @@ endif()
 # Create our test programs
 add_subdirectory(Test01)
 add_subdirectory(Test02)
+add_subdirectory(Test03)
