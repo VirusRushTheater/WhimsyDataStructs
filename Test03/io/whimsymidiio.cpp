@@ -19,9 +19,9 @@ size_t MidiIO::write(const char* filename, WhimsyVector<TypedTable>& tracks)
     const unsigned int deltaticks = 1000;
 
     pool.addItems("MThd",               0x00, 0x00, 0x00, 0x06,
-                  0x00,                 0x01,
-                  tracks.size() >> 8,   tracks.size(),
-                  deltaticks >> 8,      deltaticks);
+                  0x00,                 0x01)
+         .addWordBigEndian(tracks.size())
+         .addWordBigEndian(deltaticks);
 
     for(unsigned int i = 0; i < tracks.size(); i++)
     {
@@ -33,6 +33,7 @@ size_t MidiIO::write(const char* filename, WhimsyVector<TypedTable>& tracks)
         // End of track Meta-event
         trkpool.addItems(0x2F, 0x00);
 
+        headertrkpool.addIntBigEndian(trkpool.size());
         pool.concatenate(headertrkpool);
         pool.concatenate(trkpool);
     }

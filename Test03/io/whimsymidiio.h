@@ -34,6 +34,8 @@ public:
  */
 class MidiIO
 {
+public:
+
     /**
      * @brief Reads a MIDI file.
      * @param [In] filename     Path of the MIDI file you want to open.

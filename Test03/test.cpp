@@ -8,13 +8,10 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    int p;
+    WhimsyVector<TypedTable> wtt;
+    wtt.push_back(TypedTable());
 
-    ByteStream k;
-    k.addMidiVarLen(180375);
-    k.getMidiVarLen(p);
-
-    std::cout << p << std::endl;
+    whimsyio::MidiIO::write("thanks.mid", wtt);
 
     return 0;
 }
