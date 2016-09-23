@@ -8,9 +8,13 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    ByteStream k;
-    k.read("ahueonao.txt");
+    int p;
 
-    std::cout << k << std::endl;
+    ByteStream k;
+    k.addMidiVarLen(180375);
+    k.getMidiVarLen(p);
+
+    std::cout << p << std::endl;
+
     return 0;
 }
