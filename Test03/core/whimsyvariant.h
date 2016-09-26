@@ -10,7 +10,7 @@
 
 #define WHIMSYVARIANT_ENABLE_TYPE_CASTING      1
 
-typedef uint64_t    FlagType;
+typedef uint64_t            FlagType;
 
 namespace whimsycore
 {

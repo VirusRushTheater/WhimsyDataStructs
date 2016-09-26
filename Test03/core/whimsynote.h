@@ -5,11 +5,11 @@
 #include <cstring>
 #include <string>
 
-#define     WHIMSYNOTE_NULL             0
-#define     WHIMSYNOTE_OFFSET           128
+#define     WHIMSYNOTE_NULL             255
+#define     WHIMSYNOTE_OFFSET           0
 
-#define     WHIMSYNOTE_SPECIAL_STOP     1
-#define     WHIMSYNOTE_SPECIAL_RELEASE  2
+#define     WHIMSYNOTE_SPECIAL_STOP     254
+#define     WHIMSYNOTE_SPECIAL_RELEASE  253
 
 #define     WHIMSYNOTE_MACRO(CHR,OCT)   (CHR + OCT*12 + WHIMSYNOTE_OFFSET)
 
