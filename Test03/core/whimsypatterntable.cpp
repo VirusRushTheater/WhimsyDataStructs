@@ -1,4 +1,7 @@
+#include <algorithm>
+#include <utility>
 #include "whimsypatterntable.h"
+#include "whimsyexception.h"
 
 using namespace whimsycore;
 
@@ -122,5 +125,169 @@ bool PatternTableField::convertFrom(const PatternTableField &originfield)
     }
 
     return true;
+}
+
+// -----------------------------------------------------------------------------------------------
+// HELPER CLASSES END HERE
+
+PatternTable& PatternTable::addField(PatternTableHeader ph)
+{
+    _width++;
+    // Uppercases the name to be inserted both as name field and as field map.
+    std::transform(ph.codename.begin(), ph.codename.end(), ph.codename.begin(), ::toupper);
+
+    fields.push_back(PatternTableField(ph));
+
+    // Fills the newly created field with null elements to keep a rectangular shape.
+    fields[fields.size() - 1].data.insert(fields[fields.size() - 1].data.end(), _height, Variant::null);
+
+    // Updates the name map
+    codename_map[ph.codename] = &(fields[fields.size() - 1]);
+
+    return *this;
+}
+
+PatternTable& PatternTable::addField(std::string name, std::string codename, Variant::Type type, Variant minvalue, Variant maxvalue, bool convertible)
+{
+    return addField(PatternTableHeader(name, codename, type, minvalue, maxvalue, convertible));
+}
+
+PatternTable& PatternTable::addRowVector(const WhimsyVector<Variant> &cells)
+{
+    size_t      vitpos;
+    Variant     preconverted;
+
+    for(vitpos = 0; vitpos < cells.size() && vitpos < _width; vitpos++)
+    {
+        preconverted =  cells[vitpos];
+        fields[vitpos].data.push_back(preconverted.convert(fields[vitpos].header.type));
+        if(vitpos == _width)
+            break;
+    }
+
+    if(vitpos < _width)
+    {
+        for(; vitpos < _width; vitpos++)
+            fields[vitpos].data.push_back(Variant::null);
+    }
+
+    _height++;
+    return *this;
+    return *this;
+}
+
+std::string PatternTable::toString() const
+{
+    std::ostringstream retval;
+
+    if(_width == 0 || _height == 0)
+        return std::string("[]");
+
+    retval << "[";
+    for(unsigned int j = 0; j < _height; j++)
+    {
+        retval << "[";
+        for(unsigned int i = 0; i < _width; i++)
+        {
+            retval << fields[i].data[j].toString(Variant::Format_Hex);
+            if(i != _width - 1)
+                retval << "\t";
+        }
+        retval << "]";
+
+        if(j != _height - 1)
+            retval << std::endl;
+    }
+    retval << "]";
+
+    return retval.str();
+}
+
+PatternTable& PatternTable::removeRow(size_t position)
+{
+    if(position >= _height)
+        return *this;
+
+    for(unsigned int i = 0; i < fields.size(); i++)
+        fields[i].data.erase(fields[i].data.begin() + position);
+
+    _height--;
+
+    return *this;
+}
+
+PatternTable& PatternTable::removeLastRow()
+{
+    if(_width > 0)
+        return removeRow(fields[0].data.size() - 1);
+    else
+        return *this;
+}
+
+
+PatternRow PatternTable::getRow(size_t position)
+{
+    PatternRow  retval;
+    size_t      colindex;
+
+    if(position >= _height)
+        return retval;
+
+    for(colindex = 0; colindex < _width; colindex++)
+        retval.push_back(&fields[colindex].data[position]);
+
+    return retval;
+}
+
+MappedRow PatternTable::getMappedRow(size_t position)
+{
+    MappedRow   retval;
+    size_t      colindex;
+
+    if(position >= _height)
+        return retval;
+
+    for(colindex = 0; colindex < _width; colindex++)
+        retval[fields[colindex].header.codename] = &fields[colindex].data[position];
+
+    return retval;
+}
+
+
+Variant* PatternTable::getCell(std::string fieldcodename, size_t position)
+{
+    PatternTableField* fieldpointer;
+    std::map<std::string, PatternTableField*>::iterator cmit;
+
+    if(position >= _height)
+    {
+        throw Exception(this, Exception::ArrayOutOfBounds);
+        return NULL;
+    }
+
+    cmit = codename_map.find(fieldcodename);
+
+    // Not found.
+    if(cmit == codename_map.end())
+    {
+        throw Exception(this, Exception::ArrayOutOfBounds, "Column codename not found - getCell");
+        return NULL;
+    }
+
+    // We have the pointer. Now we just return a reference to data.
+    fieldpointer = (*cmit).second;
+    return(&(fieldpointer->data[position]));
+}
+
+
+Variant* PatternTable::getCell(size_t fieldindex, size_t position)
+{
+    if(position >= _height || fieldindex >= _width)
+    {
+        throw Exception(this, Exception::ArrayOutOfBounds);
+        return NULL;
+    }
+
+    return(&(fields[fieldindex].data[position]));
 }
 
