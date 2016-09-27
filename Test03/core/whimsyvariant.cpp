@@ -930,6 +930,9 @@ bool Variant::isGreaterThan(const Variant &v) const
 
 bool Variant::isEqualThan(const Variant &v) const
 {
+    if(typeID() == Null && v.typeID() == Null)
+        return true;
+
     if(typeIsNumeric(typeID()) && typeIsNumeric(v.typeID()))
         return (this->doubleValue() == v.doubleValue());
 
