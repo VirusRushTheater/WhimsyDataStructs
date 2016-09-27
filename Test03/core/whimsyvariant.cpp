@@ -898,6 +898,77 @@ Variant& Variant::convert(Variant::Type t)
     return *this;
 }
 
+bool Variant::isLowerThan(const Variant &v) const
+{
+    if(typeIsNumeric(typeID()) && typeIsNumeric(v.typeID()))
+        return (this->doubleValue() < v.doubleValue());
+
+    if(typeID() == String && v.typeID() == String)
+        return std::strcmp(data_._String->_data->c_str(), v.data_._String->_data->c_str()) < 0;
+
+    else
+    {
+        throw Exception(this, Exception::NotComparable, "Comparation invalid (isLowerThan)");
+        return false;
+    }
+}
+
+bool Variant::isGreaterThan(const Variant &v) const
+{
+    if(typeIsNumeric(typeID()) && typeIsNumeric(v.typeID()))
+        return (this->doubleValue() > v.doubleValue());
+
+    if(typeID() == String && v.typeID() == String)
+        return std::strcmp(data_._String->_data->c_str(), v.data_._String->_data->c_str()) > 0;
+
+    else
+    {
+        throw Exception(this, Exception::NotComparable, "Comparation invalid (isGreaterThan)");
+        return false;
+    }
+}
+
+bool Variant::isEqualThan(const Variant &v) const
+{
+    if(typeIsNumeric(typeID()) && typeIsNumeric(v.typeID()))
+        return (this->doubleValue() == v.doubleValue());
+
+    if(typeID() == String && v.typeID() == String)
+        return std::strcmp(data_._String->_data->c_str(), v.data_._String->_data->c_str()) == 0;
+
+    if(typeID() == VariantArray && v.typeID() == VariantArray)
+    {
+        std::vector<Variant>::const_iterator    thisit, vit;
+
+        if(data_._VariantArray->_data->size() != v.data_._VariantArray->_data->size())
+            return false;
+
+        thisit = this->data_._VariantArray->_data->begin();
+        vit = v.data_._VariantArray->_data->begin();
+
+        for(; thisit != this->data_._VariantArray->_data->end(); thisit++, vit++)
+        {
+            if(!(*thisit).isEqualThan(*vit))
+                return false;
+        }
+        return true;
+    }
+
+    else
+    {
+        //throw Exception(this, Exception::NotComparable, "Comparation invalid (isEqualThan)");
+        return false;
+    }
+}
+
+Variant& Variant::at(size_t pos)
+{
+    if(typeID() == VariantArray)
+        return data_._VariantArray->_data->at(pos);
+    else
+        return *this;
+}
+
 void Variant::noteFix()
 {
     if(data_type == Note)
@@ -907,4 +978,46 @@ void Variant::noteFix()
             WHIMSYVARIANT_CLEAR
         }
     }
+}
+
+bool Variant::operator == (const Variant& v) const
+{
+    return isEqualThan(v);
+}
+
+bool Variant::operator < (const  Variant& v) const
+{
+    return isLowerThan(v);
+}
+
+bool Variant::operator > (const  Variant& v) const
+{
+    return isGreaterThan(v);
+}
+
+bool Variant::operator <= (const  Variant& v) const
+{
+    return !isGreaterThan(v);
+}
+
+bool Variant::operator >= (const  Variant& v) const
+{
+    return !isLowerThan(v);
+}
+
+Variant& Variant::operator [] (size_t pos)
+{
+    return at(pos);
+}
+
+size_t Variant::size() const
+{
+    if(typeID() == VariantArray)
+        return data_._VariantArray->_data->size();
+    if(typeID() == String)
+        return data_._String->_data->size();
+    if(typeID() == Null)
+        return 0;
+    else
+        return 1;
 }

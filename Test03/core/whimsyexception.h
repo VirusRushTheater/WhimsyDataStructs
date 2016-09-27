@@ -40,6 +40,7 @@ public:
         NotImplemented,
         CouldNotOpenFileForWriting,
         CouldNotOpenFileForReading,
+        NotComparable,
         NotFound
     };
 

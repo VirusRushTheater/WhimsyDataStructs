@@ -131,6 +131,20 @@ public:
     std::string                     toString() const;
     std::string                     toString(OutputStringFormat ot) const;
 
+    bool                            isLowerThan(const Variant& v) const;
+    bool                            isGreaterThan(const Variant& v) const;
+    bool                            isEqualThan(const Variant& v) const;
+
+    Variant&                        at(size_t pos);
+    size_t                          size() const;
+
+    bool                            operator== (const Variant& v) const;
+    bool                            operator< (const  Variant& v) const;
+    bool                            operator> (const  Variant& v) const;
+    bool                            operator<= (const  Variant& v) const;
+    bool                            operator>= (const  Variant& v) const;
+    Variant&                        operator [] (size_t pos);
+
     static bool                     typeUsesExtraMemory(Type t);
     static bool                     typeIsNumeric(Type t);
     static bool                     typeIsInteger(Type t);

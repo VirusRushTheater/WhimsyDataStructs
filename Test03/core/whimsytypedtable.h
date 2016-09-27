@@ -28,6 +28,8 @@ struct SoftTypedVector : public WhimsyVector<Variant>
     void update();
 };
 
+
+
 class TypedTable : public Base
 {
 private:
@@ -42,17 +44,10 @@ public:
     TypedTable() : _width(0), _height(0), _addrow_cursor(0) {}
 
     template<typename ... Args>
-    void addFields(Args ... others)
-    {
-        addFieldsVector(WhimsyVector<Variant::Type>(others...));
-    }
-
-    template<typename ... Args>
     void addRow(Args ... others)
     {
         addRowVector(WhimsyVector<Variant>(others...));
     }
-
 
     TypedTable& addFieldsVector(WhimsyVector<Variant::Type> types);
     TypedTable& addRowVector(WhimsyVector<Variant> datas);

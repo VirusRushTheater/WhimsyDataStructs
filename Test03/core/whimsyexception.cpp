@@ -75,6 +75,8 @@ const char* Exception::exceptionTypeToString(ExceptionType t)
             return "Could not open file for reading";
         case CouldNotOpenFileForWriting:
             return "Could not open file for writing";
+        case NotComparable:
+            return "Variant types not comparable";
         default:
             return "Not specified";
     }
