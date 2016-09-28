@@ -13,9 +13,9 @@ typedef WhimsyVector<Variant*>              PatternRow;
 typedef std::map<std::string, Variant*>     MappedRow;
 
 /**
- * @brief The PatternTableHeader struct
+ * @brief The PatternFieldHeader struct
  */
-struct PatternTableHeader
+struct PatternFieldHeader
 {
     std::string     name;
     std::string     codename;
@@ -24,8 +24,8 @@ struct PatternTableHeader
     Variant         maxvalue;
     bool            convertible;
 
-    PatternTableHeader(){}
-    PatternTableHeader(std::string name_, std::string codename_, Variant::Type type_,
+    PatternFieldHeader(){}
+    PatternFieldHeader(std::string name_, std::string codename_, Variant::Type type_,
                        Variant minvalue_ = Variant::null, Variant maxvalue_ = Variant::null, bool convertible_ = true);
 };
 
@@ -34,14 +34,14 @@ struct PatternTableHeader
  */
 struct PatternTableField : public Base
 {
-    PatternTableHeader      header;
+    PatternFieldHeader      header;
     WhimsyVector<Variant>   data;
 
 public:
     WHIMSY_OBJECT_NAME("Core/PatternTableField")
 
     PatternTableField() {}
-    PatternTableField(PatternTableHeader ph) : header(ph) {}
+    PatternTableField(PatternFieldHeader ph) : header(ph) {}
 
     /**
      * @brief Makes sure all the data in the Variant vector is of the
@@ -59,7 +59,9 @@ public:
 };
 
 /**
- * @brief The PatternTable class
+ * @brief The PatternTable class is used to store both a channel's info and sequences of notes.
+ * It's intended to be vectorized when working in a song, in order to form polymorphic sounds. That way, each channel would
+ * specify a single sound, note or effect happening in the song a given time.
  */
 class PatternTable : public Base
 {
@@ -68,12 +70,23 @@ private:
     unsigned int                                _addrow_cursor;
     WhimsyVector<PatternTableField>             fields;
     std::map<std::string, PatternTableField*>   codename_map;
+    std::map<std::string, int>                  codename_pos;
 
-    // _null_ref is a patch solution to return not-found references in the getCell methods.
-    // Is there a cleaner way to do this?
-    Variant                                     _null_ref;
+    std::string                                 _name, _codename;
 
 public:
+    /**
+     * @brief Empty constructor. Use only for debugging purposes. For everything else, use the PatternTable(std::string, std::string) constructor instead, please.
+     */
+    PatternTable() : _name("Debug"), _codename("DEBUG") {}
+
+    /**
+     * @brief Name constructor. Gives this pattern a channel name (aesthetical reasons) and a codename (functionality reasons)
+     * @param name          Complete name of this channel.
+     * @param codename      Code name of this channel, for use in IO and Engine.
+     */
+    PatternTable(const std::string& name, const std::string& codename);
+
     /**
      * @brief Manually adds a typed field into this table.
      * @param name              Name of the field, for aesthetical reasons.
@@ -84,7 +97,7 @@ public:
      * @param convertible       Is this variable convertible to others?
      * @return  Reference to this object.
      */
-    PatternTable&   addField(std::string name, std::string codename, Variant::Type type,
+    PatternTable&   addField(const std::string& name, const std::string& codename, Variant::Type type,
                              Variant minvalue = Variant::null, Variant maxvalue = Variant::null, bool convertible = true);
 
     /**
@@ -92,7 +105,7 @@ public:
      * @param ph                Struct with initial values ready.
      * @return  Reference to this object.
      */
-    PatternTable&   addField(PatternTableHeader ph);
+    PatternTable&   addField(PatternFieldHeader ph);
 
     /**
      * @brief Appends a row with the elements in the vector, in order. If it lacks elements, it fills with Variant::null. If there are too many elements, it just discards them.
@@ -145,7 +158,7 @@ public:
      * @param position          Row position, starting from zero.
      * @return  Indicated cell reference.
      */
-    Variant* getCell(std::string fieldcodename, size_t position);
+    Variant* getCell(const std::string& fieldcodename, size_t position);
 
     /**
      * @brief Gets a cell reference, given the index of its field.
@@ -154,6 +167,18 @@ public:
      * @return  Indicated cell reference.
      */
     Variant* getCell(size_t fieldindex, size_t position);
+
+    /**
+     * @brief Gets this channel's name.
+     * @return
+     */
+    std::string getName() const;
+
+    /**
+     * @brief Gets this channel's codename.
+     * @return
+     */
+    std::string getCodename() const;
 
     /**
      * @brief Returns a string representation of this table.

@@ -8,7 +8,8 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    PatternTableHeader ph("Note!", "note", Variant::Long);
+    ByteStream bs;
+    bs.addVariableBigEndian<long long>(0xFF00EE11DD22CC33);
 
     return 0;
 }

@@ -5,7 +5,7 @@
 
 using namespace whimsycore;
 
-PatternTableHeader::PatternTableHeader(std::string name_, std::string codename_, Variant::Type type_,
+PatternFieldHeader::PatternFieldHeader(std::string name_, std::string codename_, Variant::Type type_,
                                        Variant minvalue_, Variant maxvalue_, bool convertible_) :
     name(name_), codename(codename_), type(type_),
     minvalue(minvalue_), maxvalue(maxvalue_), convertible(convertible_)
@@ -130,7 +130,7 @@ bool PatternTableField::convertFrom(const PatternTableField &originfield)
 // -----------------------------------------------------------------------------------------------
 // HELPER CLASSES END HERE
 
-PatternTable& PatternTable::addField(PatternTableHeader ph)
+PatternTable& PatternTable::addField(PatternFieldHeader ph)
 {
     _width++;
     // Uppercases the name to be inserted both as name field and as field map.
@@ -143,13 +143,14 @@ PatternTable& PatternTable::addField(PatternTableHeader ph)
 
     // Updates the name map
     codename_map[ph.codename] = &(fields[fields.size() - 1]);
+    codename_pos[ph.codename] = fields.size() - 1;
 
     return *this;
 }
 
-PatternTable& PatternTable::addField(std::string name, std::string codename, Variant::Type type, Variant minvalue, Variant maxvalue, bool convertible)
+PatternTable& PatternTable::addField(const std::string& name, const std::string& codename, Variant::Type type, Variant minvalue, Variant maxvalue, bool convertible)
 {
-    return addField(PatternTableHeader(name, codename, type, minvalue, maxvalue, convertible));
+    return addField(PatternFieldHeader(name, codename, type, minvalue, maxvalue, convertible));
 }
 
 PatternTable& PatternTable::addRowVector(const WhimsyVector<Variant> &cells)
@@ -254,8 +255,11 @@ MappedRow PatternTable::getMappedRow(size_t position)
 }
 
 
-Variant* PatternTable::getCell(std::string fieldcodename, size_t position)
+Variant* PatternTable::getCell(const std::string& fieldcodename, size_t position)
 {
+    std::string newfieldcodename;
+    std::transform(fieldcodename.begin(), fieldcodename.end(), newfieldcodename.begin(), ::toupper);
+
     PatternTableField* fieldpointer;
     std::map<std::string, PatternTableField*>::iterator cmit;
 
@@ -265,7 +269,7 @@ Variant* PatternTable::getCell(std::string fieldcodename, size_t position)
         return NULL;
     }
 
-    cmit = codename_map.find(fieldcodename);
+    cmit = codename_map.find(newfieldcodename);
 
     // Not found.
     if(cmit == codename_map.end())
@@ -291,3 +295,18 @@ Variant* PatternTable::getCell(size_t fieldindex, size_t position)
     return(&(fields[fieldindex].data[position]));
 }
 
+PatternTable::PatternTable(const std::string& name, const std::string& codename) :
+    _name(name)
+{
+    std::transform(codename.begin(), codename.end(), _codename.begin(), ::toupper);
+}
+
+std::string PatternTable::getName() const
+{
+    return _name;
+}
+
+std::string PatternTable::getCodename() const
+{
+    return _codename;
+}

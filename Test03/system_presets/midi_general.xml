@@ -1,9 +1,0 @@
-<system name="Midi General" codename="MidiGeneral">
-    <channel name="Channel %d" type="sampled" repeat="16">
-        <field type="note"      name="Note"         uplimit="127"/>
-        <field type="byte"      name="Instrument"   uplimit="127"/>
-        <field type="byte"      name="Volume"       uplimit="127"/>
-        <field type="effects"   name="Soft Effects"/>
-        <field type="effects"   name="MIDI Effects"/>
-    </channel>
-</system>

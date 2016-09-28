@@ -1,11 +1,12 @@
 #pragma once
 
+#include "core/whimsyabstractsong.h"
 #include "core/whimsybase.h"
 #include "core/whimsybytestream.h"
 #include "core/whimsyexception.h"
+#include "core/whimsymappedsong.h"
 #include "core/whimsypatterntable.h"
 #include "core/whimsynote.h"
+#include "core/whimsysequencedsong.h"
 #include "core/whimsyvariant.h"
 #include "core/whimsyvector.h"
-
-#include "core/whimsytypedtable.h"

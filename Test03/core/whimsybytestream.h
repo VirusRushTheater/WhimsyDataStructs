@@ -17,6 +17,45 @@ private:
 
     ByteStream& addIntReverseEndian(int32_t number);
     ByteStream& addWordReverseEndian(uint16_t number);
+    ByteStream& getIntReverseEndian(int32_t& number);
+    ByteStream& getWordReverseEndian(uint16_t& number);
+    template<typename T> ByteStream& addVariableReverseEndian(T variable)
+    {
+        byte* revert_pointer = reinterpret_cast<byte*>(&variable);
+        byte swap_reserve;
+
+        for(size_t i = 0; i < (sizeof(T) / 2); i++)
+        {
+            swap_reserve = revert_pointer[sizeof(T) - 1 - i];
+            revert_pointer[sizeof(T) - 1 - i] = revert_pointer[i];
+            revert_pointer[i] = swap_reserve;
+        }
+
+        this->insert(this->end(), (unsigned char*)&variable, &(((unsigned char*)&variable)[sizeof(T)]));
+
+        return *this;
+    }
+
+    template<typename T> ByteStream& getVariableReverseEndian(T& variable)
+    {
+        byte* revert_pointer = reinterpret_cast<byte*>(&variable);
+        byte swap_reserve;
+
+        if(cursor + sizeof(T) >= this->size())
+            throw Exception(this, Exception::ArrayOutOfBounds, "getVariableReverseEndian went out of bounds.");
+
+        std::memcpy(&variable, &(this->at(cursor)), sizeof(T));
+        cursor += sizeof(T);
+
+        for(size_t i = 0; i < (sizeof(T) / 2); i++)
+        {
+            swap_reserve = revert_pointer[sizeof(T) - 1 - i];
+            revert_pointer[sizeof(T) - 1 - i] = revert_pointer[i];
+            revert_pointer[i] = swap_reserve;
+        }
+
+        return *this;
+    }
 
 public:
     /**
@@ -74,23 +113,82 @@ public:
     ByteStream& addInt(int32_t number);
 
     /**
-     * @brief Adds a 16-bit (word) int as 4 new elements in Little Endian fashion (LSB first, MSB last)
+     * @brief Adds a 16-bit (word) int as 2 new elements in Little Endian fashion (LSB first, MSB last)
      * NOTE: IF YOUR PROCESSOR IS BIG ENDIAN, SET `PROCESSOR_IS_BIG_ENDIAN` MACRO TO 1!
      * @param number    16-bit integer.
      * @return          Reference to this vector.
      */
     ByteStream& addWord(uint16_t number);
 
+    /**
+     * @brief Gets a 32-bit int element from the 4 bytes in front of the reader cursor.
+     * @param number    32-bit integer where the element will be stored.
+     * @return          Reference to this vector.
+     */
+    ByteStream& getInt(int32_t& number);
+
+    /**
+     * @brief Gets a 16-bit unsigned int element (word) from the 2 bytes in front of the reader cursor.
+     * @param number    16-bit integer where the element will be stored.
+     * @return          Reference to this vector.
+     */
+    ByteStream& getWord(uint16_t& number);
+
+    /**
+     * @brief Adds a C-type variable of any type into the stream. Doesn't work with C++ variables like strings or vectors.
+     * @param number    C type variable, including array or structs. Not STL variables or other kind of dynamically allocated variables.
+     * @return          Reference to this vector.
+     */
+    template<typename T> ByteStream& addVariable(T variable)
+    {
+        this->insert(this->end(), (unsigned char*)&variable, &(((unsigned char*)&variable)[sizeof(T)]));
+        return *this;
+    }
+
+    /**
+     * @brief Gets a C-type variable of any type from the stream. Doesn't work with C++ variables like strings or vectors.
+     * @param number    C type variable reference, including array or structs. Not STL variables or other kind of dynamically allocated variables.
+     * @return          Reference to this vector.
+     */
+    template<typename T> ByteStream& getVariable(T& variable)
+    {
+        if(cursor + sizeof(T) >= this->size())
+            throw Exception(this, Exception::ArrayOutOfBounds, "getVariable went out of bounds.");
+
+        std::memcpy(&variable, &(this->at(cursor)), sizeof(T));
+        cursor += sizeof(T);
+
+        return *this;
+    }
+
 #if PROCESSOR_IS_BIG_ENDIAN == 0
     inline ByteStream& addIntBigEndian(int32_t number) {return addIntReverseEndian(number);}
     inline ByteStream& addWordBigEndian(uint16_t number) {return addWordReverseEndian(number);}
+    template<typename T> inline ByteStream& addVariableBigEndian(T number) {return addVariableReverseEndian<T>(number);}
     inline ByteStream& addIntLittleEndian(int32_t number) {return addInt(number);}
     inline ByteStream& addWordLittleEndian(uint16_t number) {return addWord(number);}
+    template<typename T> inline ByteStream& addVariableLittleEndian(T number) {return addVariable<T>(number);}
+
+    inline ByteStream& getIntBigEndian(int32_t& number) {return getIntReverseEndian(number);}
+    inline ByteStream& getWordBigEndian(uint16_t& number) {return getWordReverseEndian(number);}
+    template<typename T> inline ByteStream& getVariableBigEndian(T& number) {return getVariableReverseEndian<T>(number);}
+    inline ByteStream& getIntLittleEndian(int32_t& number) {return getInt(number);}
+    inline ByteStream& getWordLittleEndian(uint16_t& number) {return getWord(number);}
+    template<typename T> inline ByteStream& getVariableLittleEndian(T& number) {return getVariable<T>(number);}
 #else
     inline ByteStream& addIntBigEndian(int32_t number) {return addInt(number);}
     inline ByteStream& addWordBigEndian(uint16_t number) {return addWord(number);}
+    template<typename T> inline ByteStream& addVariableBigEndian(T number) {return addVariable<T>(number);}
     inline ByteStream& addIntLittleEndian(int32_t number) {return addIntReverseEndian(number);}
     inline ByteStream& addWordLittleEndian(uint16_t number) {return addWordReverseEndian(number);}
+    template<typename T> inline ByteStream& addVariableLittleEndian(T number) {return addVariableReverseEndian<T>(number);}
+
+    inline ByteStream& getIntBigEndian(int32_t& number) {return getInt(number);}
+    inline ByteStream& getWordBigEndian(uint16_t& number) {return getWord(number);}
+    template<typename T> inline ByteStream& getVariableBigEndian(T& number) {return getVariable<T>(number);}
+    inline ByteStream& getIntLittleEndian(int32_t& number) {return getIntReverseEndian(number);}
+    inline ByteStream& getWordLittleEndian(uint16_t& number) {return getWordReverseEndian(number);}
+    template<typename T> inline ByteStream& getVariableLittleEndian(T& number) {return getVariableReverseEndian<T>(number);}
 #endif
 
     /**
@@ -157,14 +255,14 @@ public:
      * @param filepath      Path of the file you want to read.
      * @return              Amount of bytes read.
      */
-    size_t read(const char* filepath);
+    size_t readFile(const char* filepath);
 
     /**
      * @brief Dumps this ByteStream data into a file.
      * @param filepath      Path of the file you want to write to.
      * @return              Amount of bytes written.
      */
-    size_t write(const char* filepath);
+    size_t writeFile(const char* filepath);
 };
 
 }

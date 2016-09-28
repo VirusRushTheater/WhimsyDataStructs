@@ -1,0 +1,16 @@
+<system name="Midi General" codename="MidiGeneral" pattern_based="no">
+    <channel name="Channel %d" type="sampledpatch"  pos="[1-9][11-16]">
+        <field type="note"      name="Note"         codename="NOTE"         uplimit="127"/>
+        <field type="byte"      name="Instrument"   codename="INSTRUMENT"   uplimit="127"/>
+        <field type="byte"      name="Volume"       codename="VOLUME"       uplimit="127"/>
+        <field type="effects"   name="Soft Effects" codename="SOFTFX"/>
+        <field type="effects"   name="MIDI Effects" codename="HARDFX"/>
+    </channel>
+    <channel name="Percussion" type="sampledperc"   pos="10">
+        <field type="note"      name="Note"         codename="NOTE"         uplimit="127"/>
+        <field type="byte"      name="Instrument"   codename="INSTRUMENT"   uplimit="127"/>
+        <field type="byte"      name="Volume"       codename="VOLUME"       uplimit="127"/>
+        <field type="effects"   name="Soft Effects" codename="SOFTFX"/>
+        <field type="effects"   name="MIDI Effects" codename="HARDFX"/>
+    </channel>
+</system>
