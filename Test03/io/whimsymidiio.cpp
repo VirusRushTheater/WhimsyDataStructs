@@ -2,6 +2,37 @@
 
 using namespace whimsyio;
 using namespace whimsycore;
+
+/**
+ * @brief Constructor. Fixes dynamic MIDI channel data.
+ */
+MidiSong::MidiSong()
+{
+    // channelheaders[channel][field] -> Fields: Note, Instrument, FX
+    PatternFieldHeader channelheaders[16][4];
+
+    char chname[16];
+    char chcodename[16];
+
+    for(byte i = 0; i < 16; i++)
+    {
+        std::snprintf(chname, 16, "Channel %02d", i + 1);
+        std::snprintf(chcodename, 16, "CH%02d", i + 1);
+        channelheaders[i][0] = PatternFieldHeader("Note", "NOTE", Variant::Note);
+        channelheaders[i][1] = PatternFieldHeader("Instrument", "INST", Variant::Byte, 0, 127);
+        channelheaders[i][2] = PatternFieldHeader("Volume", "VOL ", Variant::Byte, 0, 127);
+        channelheaders[i][3] = PatternFieldHeader("Effects", "SWFX", Variant::VariantArray);
+
+        channels.push_back(PatternTable(chname, chcodename)
+            .addField(channelheaders[i][0])
+            .addField(channelheaders[i][1])
+            .addField(channelheaders[i][2])
+            .addField(channelheaders[i][3]));
+        channel_pointer_map[std::string(chcodename)] =  &(channels.at(i));
+        channel_pos_map[std::string(chcodename)] =      i;
+    }
+}
+
 /*
 size_t MidiIO::read(const char* filename, WhimsyVector<TypedTable>& tracks)
 {

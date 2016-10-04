@@ -41,7 +41,7 @@ private:
         byte* revert_pointer = reinterpret_cast<byte*>(&variable);
         byte swap_reserve;
 
-        if(cursor + sizeof(T) >= this->size())
+        if(cursor + sizeof(T) > this->size())
             throw Exception(this, Exception::ArrayOutOfBounds, "getVariableReverseEndian went out of bounds.");
 
         std::memcpy(&variable, &(this->at(cursor)), sizeof(T));
@@ -152,7 +152,7 @@ public:
      */
     template<typename T> ByteStream& getVariable(T& variable)
     {
-        if(cursor + sizeof(T) >= this->size())
+        if(cursor + sizeof(T) > this->size())
             throw Exception(this, Exception::ArrayOutOfBounds, "getVariable went out of bounds.");
 
         std::memcpy(&variable, &(this->at(cursor)), sizeof(T));
@@ -241,7 +241,7 @@ public:
     template<typename T>
     ByteStream& operator >> (T& dest)
     {
-        if(cursor + sizeof(T) >= this->size())
+        if(cursor + sizeof(T) > this->size())
             throw Exception(this, Exception::ArrayOutOfBounds, "Operator >> out of bounds.");
 
         std::memcpy(&dest, &(this->at(cursor)), sizeof(T));

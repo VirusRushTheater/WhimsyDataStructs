@@ -24,7 +24,7 @@ public:
      * Use the macro WHIMSY_OBJECT_NAME inside the public: section of every child class you make.
      * @return  Name of derived class.
      */
-    virtual const char* className() const = 0;
+    virtual const char* className() const {return "";}
 
     /**
      * @brief Returns a string representation of the derived class. For debug purposes mostly.

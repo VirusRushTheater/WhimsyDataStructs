@@ -47,12 +47,13 @@ std::string Exception::toString() const
     if(_uses_additional_info)
         retval << " - " << _additional_info;
 
-    return retval.str().c_str();
+    return retval.str();
 }
 
 const char* Exception::what() const throw()
 {
-    return toString().c_str();
+    std::cerr << toString() << std::endl;
+    return "An instance of whimsycore::Exception was thrown.\n";
 }
 
 const char* Exception::exceptionTypeToString(ExceptionType t)

@@ -10,8 +10,10 @@ namespace whimsycore
 
 /**
  * @brief Wrapper for std::vector to manage a variadic argument constructor, and nice item adder methods.
+ * Due to its toString() debug method, it only can hold classes able to output their values to a STL stream, like any base classes and a whimsycore::Base derived class.
+ * It will throw an error if you vectorize another, and I don't know how to make a workaround using some smart template tricks.
  */
-template <typename T>
+template <typename T, bool Strrep = true>
 class WhimsyVector : public Base, public std::vector<T>
 {
 public:

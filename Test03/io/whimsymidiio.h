@@ -8,32 +8,16 @@ namespace whimsyio
 using namespace whimsycore;
 
 /**
- * @brief A Test class for song MIDI IO.
+ * @brief A test class to see how this thing will be structured.
+ * I'm thinking for the main Whimsy song data files to be compatible with MIDI. I hope this thing works!
  */
-class MidiTrackTest : public SequencedSong
+class MidiSong : public SequencedSong
 {
-private:
-    WhimsyVector<PatternTable>  channels;
+protected:
+    ByteStream  filedata;
 
 public:
-    MidiTrackTest()
-    {
-        PatternFieldHeader note_hdr[] =
-        {
-            PatternFieldHeader("Note", "NOTE", Variant::Note),
-            PatternFieldHeader("Instrument", "INS", Variant::Byte, 0, 127),
-            PatternFieldHeader("Volume", "VOL", Variant::Byte, 0, 127),
-            PatternFieldHeader("Software FX", "SWFX", Variant::VariantArray)
-        };
-
-        PatternFieldHeader perc_hdr[] =
-        {
-            PatternFieldHeader("Patch", "PATCH", Variant::Byte, 35, 81),
-            PatternFieldHeader("Instrument", "INS", Variant::Byte, 0, 127),
-            PatternFieldHeader("Volume", "VOL", Variant::Byte, 0, 127),
-            PatternFieldHeader("Software FX", "SWFX", Variant::VariantArray)
-        };
-    }
+    MidiSong();
 };
 
 /**

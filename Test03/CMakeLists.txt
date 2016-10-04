@@ -1,4 +1,4 @@
-set(RELEVANT_FOLDERS core system io .)
+set(RELEVANT_FOLDERS core system io third_party/tinyxml .)
 
 set(TEST03_SRC)
 

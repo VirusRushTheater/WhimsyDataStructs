@@ -29,7 +29,7 @@ ByteStream& ByteStream::addWordReverseEndian(uint16_t number)
 
 ByteStream& ByteStream::getIntReverseEndian(int32_t& number)
 {
-    if(cursor + 4 >= this->size())
+    if(cursor + 4 > this->size())
         throw Exception(this, Exception::ArrayOutOfBounds, "getIntReverseEndian went out of bounds.");
 
     byte* input = reinterpret_cast<byte*>(&number);
@@ -43,7 +43,7 @@ ByteStream& ByteStream::getIntReverseEndian(int32_t& number)
 
 ByteStream& ByteStream::getWordReverseEndian(uint16_t &number)
 {
-    if(cursor + 2 >= this->size())
+    if(cursor + 2 > this->size())
         throw Exception(this, Exception::ArrayOutOfBounds, "getWordReverseEndian went out of bounds.");
 
     byte* input = reinterpret_cast<byte*>(&number);
@@ -107,7 +107,7 @@ ByteStream& ByteStream::getMidiVarLen(int& number)
 
 ByteStream& ByteStream::getInt(int32_t &number)
 {
-    if(cursor + 4 >= this->size())
+    if(cursor + 4 > this->size())
         throw Exception(this, Exception::ArrayOutOfBounds, "getInt went out of bounds.");
 
     std::memcpy(&number, &(this->at(cursor)), 4);
@@ -117,7 +117,7 @@ ByteStream& ByteStream::getInt(int32_t &number)
 
 ByteStream& ByteStream::getWord(uint16_t &number)
 {
-    if(cursor + 2 >= this->size())
+    if(cursor + 2 > this->size())
         throw Exception(this, Exception::ArrayOutOfBounds, "getWord went out of bounds.");
 
     std::memcpy(&number, &(this->at(cursor)), 2);

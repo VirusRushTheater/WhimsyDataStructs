@@ -8,8 +8,11 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    ByteStream bs;
-    bs.addVariableBigEndian<long long>(0xFF00EE11DD22CC33);
+    whimsyio::MidiSong bullshit;
+
+    bullshit.setHeight(64);
+
+    std::cout << bullshit << std::endl;
 
     return 0;
 }

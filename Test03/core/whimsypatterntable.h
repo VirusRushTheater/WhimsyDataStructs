@@ -15,7 +15,7 @@ typedef std::map<std::string, Variant*>     MappedRow;
 /**
  * @brief The PatternFieldHeader struct
  */
-struct PatternFieldHeader
+struct PatternFieldHeader : public Base
 {
     std::string     name;
     std::string     codename;
@@ -27,6 +27,8 @@ struct PatternFieldHeader
     PatternFieldHeader(){}
     PatternFieldHeader(std::string name_, std::string codename_, Variant::Type type_,
                        Variant minvalue_ = Variant::null, Variant maxvalue_ = Variant::null, bool convertible_ = true);
+
+    std::string toString() const {return "";}
 };
 
 /**
@@ -56,6 +58,36 @@ public:
      * @return  True if the data was converted. False if data is unconvertible.
      */
     bool convertFrom(const PatternTableField& originfield);
+
+    /**
+     * @brief Fills or remove rows to fit with the desired amount. Newly added fields will be filled with NULLs.
+     * WARNING! This method may lead to loss of data, use with caution.
+     * @param amount    Amount of rows this field will have.
+     */
+    void setHeight(size_t amount);
+
+    /**
+     * @brief Adds a determined number of rows at the end of this field.
+     * @param amount
+     */
+    void addRows(size_t amount);
+
+    /**
+     * @brief Deletes a determined number of rows at the end of this field. This leads to data loss, use with moderation.
+     * @param amount
+     */
+    void deleteRows(size_t amount);
+
+    /**
+     * @brief Gets how many data rows has this field.
+     * @return How many data rows has this field.
+     */
+    size_t height() const;
+
+    /**
+     * @brief Erases all row data from this field.
+     */
+    void cleanse();
 };
 
 /**
@@ -65,6 +97,10 @@ public:
  */
 class PatternTable : public Base
 {
+    friend class AbstractSong;
+    friend class MappedSong;
+    friend class SequencedSong;
+
 private:
     unsigned int                                _width, _height;
     unsigned int                                _addrow_cursor;
@@ -75,6 +111,8 @@ private:
     std::string                                 _name, _codename;
 
 public:
+    WHIMSY_OBJECT_NAME("Core/PatternTable")
+
     /**
      * @brief Empty constructor. Use only for debugging purposes. For everything else, use the PatternTable(std::string, std::string) constructor instead, please.
      */
@@ -139,6 +177,13 @@ public:
     PatternTable&   removeLastRow();
 
     /**
+     * @brief Fills or remove rows to each field, to fit with the desired amount. Newly added fields will be filled with NULLs.
+     * WARNING! This method may lead to loss of data, use with caution.
+     * @param amount    Amount of rows this table will have.
+     */
+    void setHeight(size_t amount);
+
+    /**
      * @brief Gets references to a given row's elements.
      * @param position  Row position, starting from zero.
      * @return  Vector with a row's elements references.
@@ -179,6 +224,24 @@ public:
      * @return
      */
     std::string getCodename() const;
+
+    /**
+     * @brief Appends a number of empty rows (Variant::null) to the end of each field of this table.
+     * @param amount    Number of new, fresh, empty rows.
+     */
+    void addEmptyRows(size_t amount);
+
+    /**
+     * @brief Deletes a number of empty rows from the end of each field of this table.
+     * @param amount    Number of rows to be deleted.
+     */
+    void deleteRows(size_t amount);
+
+    /**
+     * @brief Gets the number of rows this table has.
+     * @return  The number of rows this table has.
+     */
+    size_t height() const;
 
     /**
      * @brief Returns a string representation of this table.

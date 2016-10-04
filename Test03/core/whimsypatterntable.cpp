@@ -127,6 +127,45 @@ bool PatternTableField::convertFrom(const PatternTableField &originfield)
     return true;
 }
 
+void PatternTableField::setHeight(size_t amount)
+{
+    // Nothing happens
+    if(amount == data.size())
+        return;
+
+    // Increase size -> insert NULLs at end
+    if(amount > data.size())
+    {
+        data.insert(data.end(), amount - data.size(), Variant::null);
+    }
+
+    // Decrease size -> remove rows at end
+    else
+    {
+        data.erase(data.end() - (data.size() - amount), data.end());
+    }
+}
+
+size_t PatternTableField::height() const
+{
+    return data.size();
+}
+
+void PatternTableField::cleanse()
+{
+    data.clear();
+}
+
+void PatternTableField::addRows(size_t amount)
+{
+    data.insert(data.end(), amount, Variant::null);
+}
+
+void PatternTableField::deleteRows(size_t amount)
+{
+    data.erase(data.end() - amount, data.end());
+}
+
 // -----------------------------------------------------------------------------------------------
 // HELPER CLASSES END HERE
 
@@ -296,9 +335,9 @@ Variant* PatternTable::getCell(size_t fieldindex, size_t position)
 }
 
 PatternTable::PatternTable(const std::string& name, const std::string& codename) :
-    _name(name)
+    _name(name), _codename(codename)
 {
-    std::transform(codename.begin(), codename.end(), _codename.begin(), ::toupper);
+    std::transform(_codename.begin(), _codename.end(), _codename.begin(), ::toupper);
 }
 
 std::string PatternTable::getName() const
@@ -309,4 +348,37 @@ std::string PatternTable::getName() const
 std::string PatternTable::getCodename() const
 {
     return _codename;
+}
+
+void PatternTable::setHeight(size_t amount)
+{
+    for(size_t i = 0; i < fields.size(); i++)
+        fields[i].setHeight(amount);
+
+    _height = amount;
+}
+
+void PatternTable::addEmptyRows(size_t amount)
+{
+    for(size_t i = 0; i < fields.size(); i++)
+        fields[i].addRows(amount);
+
+    _height += amount;
+}
+
+void PatternTable::deleteRows(size_t amount)
+{
+    // Exceeded current capacity.
+    if(amount > _height)
+        return;
+
+    for(size_t i = 0; i < fields.size(); i++)
+        fields[i].deleteRows(amount);
+
+    _height -= amount;
+}
+
+size_t PatternTable::height() const
+{
+    return _height;
 }
