@@ -78,6 +78,8 @@ const char* Exception::exceptionTypeToString(ExceptionType t)
             return "Could not open file for writing";
         case NotComparable:
             return "Variant types not comparable";
+        case MalformedXML:
+            return "Malformed XML";
         default:
             return "Not specified";
     }

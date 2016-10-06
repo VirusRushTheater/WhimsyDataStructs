@@ -6,8 +6,10 @@ using namespace whimsycore;
 /**
  * @brief Constructor. Fixes dynamic MIDI channel data.
  */
+/*
 MidiSong::MidiSong()
 {
+
     // channelheaders[channel][field] -> Fields: Note, Instrument, FX
     PatternFieldHeader channelheaders[16][4];
 
@@ -31,7 +33,9 @@ MidiSong::MidiSong()
         channel_pointer_map[std::string(chcodename)] =  &(channels.at(i));
         channel_pos_map[std::string(chcodename)] =      i;
     }
+
 }
+*/
 
 /*
 size_t MidiIO::read(const char* filename, WhimsyVector<TypedTable>& tracks)

@@ -1,16 +1,104 @@
-<system name="Midi General" codename="MidiGeneral" pattern_based="no">
-    <channel name="Channel %d" type="sampledpatch"  pos="[1-9][11-16]">
-        <field type="note"      name="Note"         codename="NOTE"         uplimit="127"/>
-        <field type="byte"      name="Instrument"   codename="INSTRUMENT"   uplimit="127"/>
-        <field type="byte"      name="Volume"       codename="VOLUME"       uplimit="127"/>
-        <field type="effects"   name="Soft Effects" codename="SOFTFX"/>
-        <field type="effects"   name="MIDI Effects" codename="HARDFX"/>
+<!--
+    MIDI Specification v1 system information.
+    MIDI uses 16 channels, being channel 10 a percussion one.
+
+    Will it be convenient to use MIDI as the program's native format?
+-->
+
+<system name="Midi General" mapped="false">
+    <channel name="Channel 01" id="CH01" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
     </channel>
-    <channel name="Percussion" type="sampledperc"   pos="10">
-        <field type="note"      name="Note"         codename="NOTE"         uplimit="127"/>
-        <field type="byte"      name="Instrument"   codename="INSTRUMENT"   uplimit="127"/>
-        <field type="byte"      name="Volume"       codename="VOLUME"       uplimit="127"/>
-        <field type="effects"   name="Soft Effects" codename="SOFTFX"/>
-        <field type="effects"   name="MIDI Effects" codename="HARDFX"/>
+    <channel name="Channel 02" id="CH02" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 03" id="CH03" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 04" id="CH04" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 05" id="CH05" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 06" id="CH06" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 07" id="CH07" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 08" id="CH08" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 09" id="CH09" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 10" id="CH10" type="sampledpercussion">
+        <field type="byte"      name="Sample"       id="NOTE"         minvalue="35" maxvalue="81"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 11" id="CH11" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 12" id="CH12" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 13" id="CH13" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 14" id="CH14" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 15" id="CH15" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
+    </channel>
+    <channel name="Channel 16" id="CH16" type="sampledpatch">
+        <field type="note"      name="Note"         id="NOTE"         maxvalue="B-9"/>
+        <field type="byte"      name="Instrument"   id="INST"         maxvalue="127"/>
+        <field type="byte"      name="Volume"       id="VOL "         maxvalue="127"/>
+        <field type="effect"    name="Effects"      id="FX  "/>
     </channel>
 </system>

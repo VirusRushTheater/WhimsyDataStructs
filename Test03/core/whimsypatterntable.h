@@ -18,7 +18,7 @@ typedef std::map<std::string, Variant*>     MappedRow;
 struct PatternFieldHeader : public Base
 {
     std::string     name;
-    std::string     codename;
+    std::string     id;
     Variant::Type   type;
     Variant         minvalue;
     Variant         maxvalue;

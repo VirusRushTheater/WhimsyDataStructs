@@ -108,6 +108,7 @@ public:
     Variant::Type                   typeID() const;
 
     static const char*              typeToString(Variant::Type t);
+    static Variant::Type            typeFromString(const char* s);
 
     bool                            isNull() const;
 

@@ -204,6 +204,31 @@ const char* Variant::typeToString(Variant::Type t)
 }
 
 /**
+ * @brief Returns the type ID given the name of a type.
+ * @param s     Type name
+ * @return
+ */
+Variant::Type Variant::typeFromString(const char* s)
+{
+    // If strcasecmp returns zero, the string matches.
+         if(!strcasecmp(s, "null"))     return Type::Null;
+    else if(!strcasecmp(s, "bool"))     return Type::Bool;
+    else if(!strcasecmp(s, "nibble"))   return Type::Nibble;
+    else if(!strcasecmp(s, "byte"))     return Type::Byte;
+    else if(!strcasecmp(s, "word"))     return Type::Word;
+    else if(!strcasecmp(s, "int"))      return Type::Integer;
+    else if(!strcasecmp(s, "float"))    return Type::Float;
+    else if(!strcasecmp(s, "double"))   return Type::Double;
+    else if(!strcasecmp(s, "long"))     return Type::Long;
+    else if(!strcasecmp(s, "note"))     return Type::Note;
+    else if(!strcasecmp(s, "string"))   return Type::String;
+    else if(!strcasecmp(s, "array"))    return Type::VariantArray;
+    else if(!strcasecmp(s, "effect"))   return Type::Effect;
+    else if(!strcasecmp(s, "pointer"))  return Type::GenericPointer;
+    else                                return Type::Null;
+}
+
+/**
  * @brief Tells whether this variant holds a null value or not.
  * @return
  */

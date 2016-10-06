@@ -2,20 +2,25 @@
 
 #include "whimsybase.h"
 #include "whimsypatterntable.h"
-
-#include "../third_party/tinyxml/tinyxml2.h"
+#include "whimsysystemprofile.h"
 
 namespace whimsycore
 {
-
-class SequencedSong;
-class MappedSong;
 
 /**
  * @brief Enables easy selection of a portion of a pattern table with several depth levels.
  *
  * You start referencing a song with the PatternSelector (using its constructor or ChangeSong)
  * Then, its procedure is a bit different depending on which type of song does it select.
+ *
+ * === Explanation ===
+ * If it helps you, think on each patterned song as a table of 4 dimensions. This selector helps to slice
+ * each one of these dimensions until you get to a single point you can modify.
+ * There's a mathematical definition of what I'm doing.
+ * - `S(channel, pattern, field, row)` = a single value you can modify (represented as a reference to a Variant)
+ *
+ * You can swap any way you like, but with the following requirements:
+ * - You must select `channel` prior to `field`. Names and amount of fields depend on the selected channel. Not doing so may lead to unexpected behavior.
  *
  * === SequencedSong ===
  * As SequencedSong is not mapped, the entire song information is stored in only one row of PatternTables
@@ -36,35 +41,22 @@ class MappedSong;
  * - If channel already selected, PatternSelector[string] selects a field. Alias for PatternSelector.selectField()
  *
  */
+class AbstractSong;
+
 class PatternSelector : public Base
-{
+{   
 private:
-    // One of them will be null.
-    SequencedSong*      _seqsong;
-    MappedSong*         _mapsong;
+    // Selected song
+    AbstractSong*       _selectedSong;
 
     // Different depth levels
     PatternTable*       _songchannel;
+    int                 _patternpos;
     int                 _rowpos;
     PatternTableField*  _channelfield;
 
 public:
-    /**
-     * @brief Constructor for SequencedSong selection.
-     * @param seqsong   Pointer to a SequencedSong.
-     */
-    PatternSelector(SequencedSong* seqsong);
 
-    /**
-     * @brief Resets row, channel, field and map selectors.
-     * @return  Reference to this PatternSelector.
-     */
-    void reset();
-
-    /**
-     * @brief Clears (turns into Variant::null) all the field associated data in the selection.
-     */
-    void clear();
 };
 
 /**
@@ -74,6 +66,19 @@ public:
 class AbstractSong : public Base
 {
 protected:
+    // Stores system info, for quick song copying.
+    SystemProfile                               sysprofile;
+
+    // Normally it would be an integer array, but Variant grants more flexibility, as it may have NULL values and others which may appear in unknown systems.
+    // It's a rectangular table indicating rows of polyphonic patterns, played at the same time, in a FamiTracker/Deflemask fashion.
+    WhimsyVector<WhimsyVector<Variant> >        sequence_map;
+
+    // Each PatternTable represents a patterned segment in a channel.
+    WhimsyVector<WhimsyVector<PatternTable> >   channels;
+
+    // Maps to translate code names into
+    std::map<std::string, PatternTable*>        channel_pointer_map;
+    std::map<std::string, byte>                 channel_pos_map;
 
 public:
     AbstractSong();
@@ -82,6 +87,21 @@ public:
     {
         return "[Abstract song]";
     }
+
+    /**
+     * @brief Loads a system profile from a XML string. Read the README for more information.
+     * *[Uses Third Party library: TinyXML2]*
+     * @param xmlstring String containing the XML string.
+     */
+    void loadSystemProfileFromXML(std::string xmlstring);
+
+    /**
+     * @brief Returns a PatternSelector pointing to this song, allowing rows, channels, fields and patterns to be easily selected.
+     * Their implementation depends on the c
+     * hild class. Read their references for more information.
+     * @return
+     */
+    //virtual PatternSelector     select() = 0;
 };
 
 }

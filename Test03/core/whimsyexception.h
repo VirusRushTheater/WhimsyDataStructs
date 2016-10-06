@@ -41,6 +41,7 @@ public:
         CouldNotOpenFileForWriting,
         CouldNotOpenFileForReading,
         NotComparable,
+        MalformedXML,
         NotFound
     };
 

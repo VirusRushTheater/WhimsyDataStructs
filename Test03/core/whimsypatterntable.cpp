@@ -7,7 +7,7 @@ using namespace whimsycore;
 
 PatternFieldHeader::PatternFieldHeader(std::string name_, std::string codename_, Variant::Type type_,
                                        Variant minvalue_, Variant maxvalue_, bool convertible_) :
-    name(name_), codename(codename_), type(type_),
+    name(name_), id(codename_), type(type_),
     minvalue(minvalue_), maxvalue(maxvalue_), convertible(convertible_)
 {
     // Assign this by data type.
@@ -173,7 +173,7 @@ PatternTable& PatternTable::addField(PatternFieldHeader ph)
 {
     _width++;
     // Uppercases the name to be inserted both as name field and as field map.
-    std::transform(ph.codename.begin(), ph.codename.end(), ph.codename.begin(), ::toupper);
+    std::transform(ph.id.begin(), ph.id.end(), ph.id.begin(), ::toupper);
 
     fields.push_back(PatternTableField(ph));
 
@@ -181,8 +181,8 @@ PatternTable& PatternTable::addField(PatternFieldHeader ph)
     fields[fields.size() - 1].data.insert(fields[fields.size() - 1].data.end(), _height, Variant::null);
 
     // Updates the name map
-    codename_map[ph.codename] = &(fields[fields.size() - 1]);
-    codename_pos[ph.codename] = fields.size() - 1;
+    codename_map[ph.id] = &(fields[fields.size() - 1]);
+    codename_pos[ph.id] = fields.size() - 1;
 
     return *this;
 }
@@ -288,7 +288,7 @@ MappedRow PatternTable::getMappedRow(size_t position)
         return retval;
 
     for(colindex = 0; colindex < _width; colindex++)
-        retval[fields[colindex].header.codename] = &fields[colindex].data[position];
+        retval[fields[colindex].header.id] = &fields[colindex].data[position];
 
     return retval;
 }

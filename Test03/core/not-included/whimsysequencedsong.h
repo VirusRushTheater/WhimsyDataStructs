@@ -5,15 +5,8 @@
 namespace whimsycore {
 
 class SequencedSong : public AbstractSong
-{
+{   
 protected:
-    size_t                                  _height;
-
-    WhimsyVector<PatternFieldHeader>        channel_info;
-    WhimsyVector<PatternTable>              channels;
-
-    std::map<std::string, PatternTable*>    channel_pointer_map;
-    std::map<std::string, byte>             channel_pos_map;
 
 public:
     SequencedSong();

@@ -8,11 +8,13 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    whimsyio::MidiSong bullshit;
+    SystemProfile sp;
+    ByteStream xmlfile;
+    xmlfile.readFile("../../../Test03/system_presets/preset_midi.xml");
 
-    bullshit.setHeight(64);
+    char* xmlfiledata = reinterpret_cast<char*>(xmlfile.data());
 
-    std::cout << bullshit << std::endl;
+    sp.loadFromXML(xmlfiledata);
 
     return 0;
 }

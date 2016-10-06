@@ -2,6 +2,7 @@
 
 using namespace whimsycore;
 
+/*
 SequencedSong::SequencedSong()
  : _height(0)
 {
@@ -47,3 +48,4 @@ std::string SequencedSong::toString() const
 
     return totalinfo.str();
 }
+*/
