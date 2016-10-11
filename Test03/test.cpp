@@ -9,12 +9,11 @@ using namespace whimsycore;
 int main(int argc, char** argv)
 {
     SystemProfile sp;
-    ByteStream xmlfile;
-    xmlfile.readFile("../../../Test03/system_presets/preset_midi.xml");
+    Song sng;
 
-    char* xmlfiledata = reinterpret_cast<char*>(xmlfile.data());
+    sng.loadSystemProfileFromXMLFile("../../../Test03/system_presets/preset_midi.xml");
 
-    sp.loadFromXML(xmlfiledata);
+    sng.addChannelPattern("CH01");
 
     return 0;
 }

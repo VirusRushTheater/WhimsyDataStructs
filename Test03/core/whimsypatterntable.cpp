@@ -335,9 +335,18 @@ Variant* PatternTable::getCell(size_t fieldindex, size_t position)
 }
 
 PatternTable::PatternTable(const std::string& name, const std::string& codename) :
-    _name(name), _codename(codename)
+    _name(name), _codename(codename), _width(0), _height(0), _addrow_cursor(0)
 {
     std::transform(_codename.begin(), _codename.end(), _codename.begin(), ::toupper);
+}
+
+PatternTable::PatternTable(const std::string& name, const std::string& codename, const WhimsyVector<PatternFieldHeader>& fields) :
+    _name(name), _codename(codename), _width(0), _height(0), _addrow_cursor(0)
+{
+    WhimsyVector<PatternFieldHeader>::const_iterator f_it;
+    std::transform(_codename.begin(), _codename.end(), _codename.begin(), ::toupper);
+    for(f_it = fields.begin(); f_it != fields.end(); f_it++)
+        addField(*f_it);
 }
 
 std::string PatternTable::getName() const

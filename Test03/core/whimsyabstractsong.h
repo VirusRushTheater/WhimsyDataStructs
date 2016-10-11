@@ -41,30 +41,51 @@ namespace whimsycore
  * - If channel already selected, PatternSelector[string] selects a field. Alias for PatternSelector.selectField()
  *
  */
-class AbstractSong;
+class Song;
 
 class PatternSelector : public Base
 {   
+    friend class Song;
+
 private:
     // Selected song
-    AbstractSong*       _selectedSong;
+    Song*       _selectedSong;
 
     // Different depth levels
     PatternTable*       _songchannel;
     int                 _patternpos;
-    int                 _rowpos;
     PatternTableField*  _channelfield;
+    int                 _rowpos;
 
 public:
+    // TODO: Implement it tomorrow.
+    PatternSelector(const Song& _song) :
+        _selectedSong(&_song), _songchannel(NULL), _patternpos(-1), _channelfield(NULL), _rowpos(-1) {}
 
+    PatternSelector&    selectChannel(const char* channelid);
+    PatternSelector&    selectChannel(size_t channel_index);
+
+    PatternSelector&    selectPattern(size_t pattern_index);
+
+    PatternSelector&    selectField(const char* fieldid);
+    PatternSelector&    selectField(size_t field_index);
+
+    PatternSelector&    selectRow(size_t row_index);
+
+    Variant*            operator&();
+
+    PatternSelector&    operator =(const Variant& equal);
 };
 
 /**
  * @brief Defines a common ground for use in all types of songs, like tempo, time signatures and common IO and engine
  * communication functionality.
  */
-class AbstractSong : public Base
+class Song : public Base
 {
+private:
+    void constructFromSysProfile();
+
 protected:
     // Stores system info, for quick song copying.
     SystemProfile                               sysprofile;
@@ -77,11 +98,10 @@ protected:
     WhimsyVector<WhimsyVector<PatternTable> >   channels;
 
     // Maps to translate code names into
-    std::map<std::string, PatternTable*>        channel_pointer_map;
-    std::map<std::string, byte>                 channel_pos_map;
+    std::map<std::string, unsigned int>         channel_pos_map;
 
 public:
-    AbstractSong();
+    Song();
 
     std::string toString() const
     {
@@ -89,11 +109,41 @@ public:
     }
 
     /**
-     * @brief Loads a system profile from a XML string. Read the README for more information.
-     * *[Uses Third Party library: TinyXML2]*
-     * @param xmlstring String containing the XML string.
+     * @brief Loads this song's system profile (channels and fields disposition) from an XML file. See references in the folder system_presets for more information.
+     * @param filename  Path of the system profile XML.
      */
-    void loadSystemProfileFromXML(std::string xmlstring);
+    void loadSystemProfileFromXMLFile(const char* filename);
+
+    /**
+     * @brief Loads this song's system profile (channels and fields disposition) from a XML string. See references in the folder system_presets for more information.
+     * @param xmlstring  String with XML information.
+     */
+    void loadSystemProfileFromXMLString(const char* xmlstring);
+
+    /**
+     * @brief Clears and loads a system profile.
+     * @param sp    Loaded system profile.
+     */
+    void loadSystemProfile(const SystemProfile& sp);
+
+    /**
+     * @brief Gets this song's system profile.
+     * @return
+     */
+    SystemProfile getSystemProfile() const;
+
+    /**
+     * @brief Clears all this song's and system's info.
+     */
+    void clear();
+
+    /**
+     * @brief Adds a pattern table to a channel.
+     * @param channelid     ID (codename) of the channel you want to add a pattern to.
+     * @return Pointer to the newly added pattern.
+     */
+    virtual PatternTable* addChannelPattern(std::string channelid);
+    virtual PatternTable* addChannelPattern(size_t channelindex);
 
     /**
      * @brief Returns a PatternSelector pointing to this song, allowing rows, channels, fields and patterns to be easily selected.

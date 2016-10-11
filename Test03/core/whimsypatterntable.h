@@ -116,7 +116,7 @@ public:
     /**
      * @brief Empty constructor. Use only for debugging purposes. For everything else, use the PatternTable(std::string, std::string) constructor instead, please.
      */
-    PatternTable() : _name("Debug"), _codename("DEBUG") {}
+    PatternTable() : _name("Debug"), _codename("DEBUG"), _width(0), _height(0), _addrow_cursor(0) {}
 
     /**
      * @brief Name constructor. Gives this pattern a channel name (aesthetical reasons) and a codename (functionality reasons)
@@ -124,6 +124,14 @@ public:
      * @param codename      Code name of this channel, for use in IO and Engine.
      */
     PatternTable(const std::string& name, const std::string& codename);
+
+    /**
+     * @brief Complete constructor. To be used in conjunction with SystemProfile's XML loading functions.
+     * @param name          Complete name of this channel.
+     * @param codename      Code name of this channel, for use in IO and Engine.
+     * @param fields        Vector containing all the fields this channel will have.
+     */
+    PatternTable(const std::string& name, const std::string& codename, const WhimsyVector<PatternFieldHeader>& fields);
 
     /**
      * @brief Manually adds a typed field into this table.
