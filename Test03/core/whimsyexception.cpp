@@ -80,6 +80,12 @@ const char* Exception::exceptionTypeToString(ExceptionType t)
             return "Variant types not comparable";
         case MalformedXML:
             return "Malformed XML";
+        case IncompleteSongSelector:
+            return "Incomplete Song Selector";
+        case ChannelDoesNotExist:
+            return "Channel does not exist";
+        case FieldDoesNotExist:
+            return "Field does not exist";
         default:
             return "Not specified";
     }

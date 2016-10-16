@@ -42,6 +42,9 @@ public:
         CouldNotOpenFileForReading,
         NotComparable,
         MalformedXML,
+        IncompleteSongSelector,
+        ChannelDoesNotExist,
+        FieldDoesNotExist,
         NotFound
     };
 

@@ -97,18 +97,17 @@ public:
  */
 class PatternTable : public Base
 {
-    friend class AbstractSong;
-    friend class MappedSong;
-    friend class SequencedSong;
+    friend class Song;
+    friend class PatternSelector;
 
 private:
+    std::string                                 _name, _codename;
+
     unsigned int                                _width, _height;
     unsigned int                                _addrow_cursor;
     WhimsyVector<PatternTableField>             fields;
     std::map<std::string, PatternTableField*>   codename_map;
     std::map<std::string, int>                  codename_pos;
-
-    std::string                                 _name, _codename;
 
 public:
     WHIMSY_OBJECT_NAME("Core/PatternTable")

@@ -49,32 +49,55 @@ class PatternSelector : public Base
 
 private:
     // Selected song
-    Song*       _selectedSong;
+    Song*               _selectedSong;
 
     // Different depth levels
-    PatternTable*       _songchannel;
-    int                 _patternpos;
+    int                 _channelindex;
+    int                 _patternindex;
+    PatternTable*       _channelandpattern;
+    int                 _fieldindex;
     PatternTableField*  _channelfield;
-    int                 _rowpos;
+    int                 _rowindex;
 
 public:
-    // TODO: Implement it tomorrow.
-    PatternSelector(const Song& _song) :
-        _selectedSong(&_song), _songchannel(NULL), _patternpos(-1), _channelfield(NULL), _rowpos(-1) {}
+    // TODO: NONE OF THESE FUNCTIONS ARE SAFE! YOU MAY GET SEGMENTATION FAULTS VERY EASILY!
+    PatternSelector(Song& _song);
+    PatternSelector(Song* _song);
 
-    PatternSelector&    selectChannel(const char* channelid);
-    PatternSelector&    selectChannel(size_t channel_index);
+    PatternSelector&            selectChannelUnsafe(const char* channelid); //
+    PatternSelector&            selectChannelUnsafe(size_t channel_index); //
+    PatternSelector&            selectChannel(const char* channelid); //
+    PatternSelector&            selectChannel(size_t channel_index); //
 
-    PatternSelector&    selectPattern(size_t pattern_index);
+    WhimsyVector<std::string>   getChannels() const; //
+    size_t                      getChannelAmount() const; //
 
-    PatternSelector&    selectField(const char* fieldid);
-    PatternSelector&    selectField(size_t field_index);
+    PatternSelector&            appendPattern();
 
-    PatternSelector&    selectRow(size_t row_index);
+    PatternSelector&            selectPatternUnsafe(size_t pattern_index); //
+    PatternSelector&            selectPattern(size_t pattern_index); //
+    size_t                      getPatternAmount() const; //
 
-    Variant*            operator&();
+    PatternSelector&            selectFieldUnsafe(const char* fieldid); //
+    PatternSelector&            selectFieldUnsafe(size_t field_index); //
+    PatternSelector&            selectField(const char* fieldid); //
+    PatternSelector&            selectField(size_t field_index); //
+    WhimsyVector<std::string>   getFields() const; //
+    size_t                      getFieldAmount() const; //
 
-    PatternSelector&    operator =(const Variant& equal);
+    PatternSelector&            selectRowUnsafe(size_t row_index); //
+    PatternSelector&            selectRow(size_t row_index); //
+    size_t                      getRowAmount() const; //
+
+    Variant                     value() const;
+    PatternSelector&            setValue(const Variant& v);
+
+    Variant&                    operator * ();
+    PatternSelector&            operator = (const Variant& v);
+
+    PatternSelector&            appendRow();
+    PatternSelector&            appendRows(size_t no);
+    void                        resizePattern(size_t newsize);
 };
 
 /**
@@ -83,6 +106,8 @@ public:
  */
 class Song : public Base
 {
+    friend class PatternSelector;
+
 private:
     void constructFromSysProfile();
 
@@ -103,10 +128,7 @@ protected:
 public:
     Song();
 
-    std::string toString() const
-    {
-        return "[Abstract song]";
-    }
+    std::string toString() const;
 
     /**
      * @brief Loads this song's system profile (channels and fields disposition) from an XML file. See references in the folder system_presets for more information.
@@ -142,8 +164,8 @@ public:
      * @param channelid     ID (codename) of the channel you want to add a pattern to.
      * @return Pointer to the newly added pattern.
      */
-    virtual PatternTable* addChannelPattern(std::string channelid);
-    virtual PatternTable* addChannelPattern(size_t channelindex);
+    PatternTable* addChannelPattern(std::string channelid);
+    PatternTable* addChannelPattern(size_t channelindex);
 
     /**
      * @brief Returns a PatternSelector pointing to this song, allowing rows, channels, fields and patterns to be easily selected.
@@ -151,7 +173,7 @@ public:
      * hild class. Read their references for more information.
      * @return
      */
-    //virtual PatternSelector     select() = 0;
+    PatternSelector     select();
 };
 
 }
