@@ -76,6 +76,7 @@ public:
 
     PatternSelector&            selectPatternUnsafe(size_t pattern_index); //
     PatternSelector&            selectPattern(size_t pattern_index); //
+    PatternSelector&            selectPatternCreate(size_t pattern_index); //
     size_t                      getPatternAmount() const; //
 
     PatternSelector&            selectFieldUnsafe(const char* fieldid); //
@@ -87,6 +88,7 @@ public:
 
     PatternSelector&            selectRowUnsafe(size_t row_index); //
     PatternSelector&            selectRow(size_t row_index); //
+    PatternSelector&            selectRowCreate(size_t row_index);
     size_t                      getRowAmount() const; //
 
     Variant                     value() const;

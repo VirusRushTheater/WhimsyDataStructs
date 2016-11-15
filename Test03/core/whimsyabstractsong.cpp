@@ -134,6 +134,16 @@ PatternSelector& PatternSelector::selectPattern(size_t pattern_index)
     return selectPatternUnsafe(pattern_index);
 }
 
+PatternSelector& PatternSelector::selectPatternCreate(size_t pattern_index)
+{
+    if(pattern_index >= getPatternAmount())
+    {
+        _selectedSong->channels[_channelindex].resize(pattern_index + 1);
+    }
+
+    return selectPatternUnsafe(pattern_index);
+}
+
 size_t PatternSelector::getPatternAmount() const
 {
     return _selectedSong->channels[_channelindex].size();
@@ -230,6 +240,16 @@ PatternSelector& PatternSelector::selectRow(size_t row_index)
     {
         throw Exception(this, Exception::ArrayOutOfBounds, "Row index does not exist.");
         return *this;
+    }
+
+    return selectRowUnsafe(row_index);
+}
+
+PatternSelector& PatternSelector::selectRowCreate(size_t row_index)
+{
+    if(row_index >= getRowAmount())
+    {
+        _channelandpattern->setHeight(row_index + 1);
     }
 
     return selectRowUnsafe(row_index);
