@@ -5,11 +5,9 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    std::cout << "Here happened nothing." << std::endl;
+    Variant hst;
+    hst["webo"][4]["lel"] = "pedro";
 
-    std::cout << "size of tree: " << sizeof(Tree) << std::endl;
-
-    Tree hst, hhh;
     hst["mobius"] = "The Architect";
     hst["kek"] = "Json";
     hst["kek"]["1"] = "1";
@@ -24,7 +22,8 @@ int main(int argc, char** argv)
     hst["kek"]["3"]["d"][2] = 5.5;
     hst["kek"]["3"]["d"][3] = "the host 4";
 
-    std::cout << hst.toJSON();
+
+    std::cout << hst.toJSONPretty();
 
     return 0;
 }

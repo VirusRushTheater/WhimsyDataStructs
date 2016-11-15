@@ -103,7 +103,7 @@ Variant::Variant(const char *_cstr)
  * @brief String constructor. Makes this variant take the value of a string.
  * @param _cstr     Initializing value.
  */
-Variant::Variant(std::string _cstr)
+Variant::Variant(const std::string& _cstr)
 {
     data_type =            Type::String;
     data_._String =          new VDPointer<std::string>(std::string(_cstr));
@@ -114,11 +114,17 @@ Variant::Variant(std::string _cstr)
  * @brief Array constructor. Makes this variant take the value of a dynamic array.
  * @param _array    Initializing value.
  */
-Variant::Variant(std::vector<Variant> _array)
+Variant::Variant(const std::vector<Variant>& _array)
 {
     data_type =            Type::VariantArray;
     data_._VariantArray =    new VDPointer<std::vector<Variant> >(_array);
     //_data.VariantArray =    new std::vector<WhimsyVariant>(_array);
+}
+
+Variant::Variant(const std::map<std::string, Variant> &_hashtable)
+{
+    data_type =             Type::HashTable;
+    data_._HashTable =      new VDPointer<std::map<std::string, Variant> >(_hashtable);
 }
 
 /**
@@ -196,6 +202,8 @@ const char* Variant::typeToString(Variant::Type t)
             return "effect";
         case Type::GenericPointer:
             return "pointer";
+        case Type::HashTable:
+            return "hashtable";
         default:
             return "unknown";
     }
@@ -225,6 +233,7 @@ Variant::Type Variant::typeFromString(const char* s)
     else if(!strcasecmp(s, "array"))    return Type::VariantArray;
     else if(!strcasecmp(s, "effect"))   return Type::Effect;
     else if(!strcasecmp(s, "pointer"))  return Type::GenericPointer;
+    else if(!strcasecmp(s, "hashtable")) return Type::HashTable;
     else                                return Type::Null;
 }
 
@@ -296,6 +305,11 @@ template<> std::string Variant::value<std::string>() const
 template<> std::vector<Variant> Variant::value<std::vector<Variant> >() const
 {
     return arrayValue();
+}
+
+template<> std::map<std::string, Variant> Variant::value<std::map<std::string, Variant> >() const
+{
+    return hashtableValue();
 }
 }
 
@@ -659,6 +673,7 @@ std::string Variant::stringValue() const
     std::ostringstream retval;
     std::vector<Variant>::iterator it;
     std::vector<Variant>::iterator almost_end;
+    std::map<std::string, Variant>::iterator itmap;
 
     switch(data_type)
     {
@@ -698,6 +713,19 @@ std::string Variant::stringValue() const
 
             retval << "]";
         break;
+        case Type::HashTable:
+            retval << "{";
+            for(itmap = data_._HashTable->_data->begin();;)
+            {
+                retval << itmap->first << " : " << itmap->second;
+                itmap++;
+                if(itmap != data_._HashTable->_data->end())
+                    retval << ", ";
+                else
+                    break;
+            }
+            retval << "}";
+        break;
         case Effect:
             // ---------------------------------------> Not yet implemented!
         break;
@@ -720,6 +748,30 @@ std::vector<Variant> Variant::arrayValue() const
         retval.push_back(*this);
 
     return retval;
+}
+
+std::map<std::string, Variant> Variant::hashtableValue() const
+{
+    std::map<std::string, Variant> retval;
+    if(data_type == HashTable)
+        retval = std::map<std::string, Variant>(*(data_._HashTable->_data));
+
+    return retval;
+}
+
+std::string& Variant::stringReference()
+{
+    return *(data_._String->_data);
+}
+
+std::vector<Variant>& Variant::arrayReference()
+{
+    return *(data_._VariantArray->_data);
+}
+
+std::map<std::string, Variant>& Variant::hashtableReference()
+{
+    return *(data_._HashTable->_data);
 }
 
 /**
@@ -759,6 +811,7 @@ std::string Variant::toString(OutputStringFormat ot) const
     std::ostringstream retval;
     std::vector<Variant>::iterator it;
     std::vector<Variant>::iterator almost_end;
+    std::map<std::string, Variant>::iterator itmap;
 
     if(ot == Format_Normal)
         return toString();
@@ -812,6 +865,19 @@ std::string Variant::toString(OutputStringFormat ot) const
 
                 retval << "]";
             break;
+            case Type::HashTable:
+                retval << "{";
+                for(itmap = data_._HashTable->_data->begin();;)
+                {
+                    retval << itmap->first << " : " << itmap->second;
+                    itmap++;
+                    if(itmap != data_._HashTable->_data->end())
+                        retval << ", ";
+                    else
+                        break;
+                }
+                retval << "}";
+            break;
             case Type::Effect:
                 // ---------------------------------------> Not yet implemented!
             break;
@@ -827,6 +893,7 @@ bool Variant::typeUsesExtraMemory(Variant::Type t)
     if(t == Type::String ||
             t == Type::VariantArray ||
             t == Type::Effect ||
+            t == Type::HashTable ||
             t == Type::GenericPointer)
         return true;
     else
@@ -907,6 +974,7 @@ Variant& Variant::convert(Variant::Type t)
         case Double:    rval = doubleValue();   break;
         case Note:      rval = noteValue();     break;
         case String:    rval = stringValue();   break;
+    case HashTable: rval = hashtableValue(); break;
         case VariantArray:
         case Effect:    rval = arrayValue();    break;
     default: break;
@@ -997,6 +1065,14 @@ Variant& Variant::at(size_t pos)
         return *this;
 }
 
+Variant& Variant::at(std::string key)
+{
+    if(typeID() == HashTable)
+        return data_._HashTable->_data->at(key);
+    else
+        return *this;
+}
+
 void Variant::noteFix()
 {
     if(data_type == Note)
@@ -1035,17 +1111,121 @@ bool Variant::operator >= (const  Variant& v) const
 
 Variant& Variant::operator [] (size_t pos)
 {
-    return at(pos);
+    if(typeID() != VariantArray)
+        *this = Variant(std::vector<Variant>());
+
+    if(pos >= size())
+        data_._VariantArray->_data->insert(data_._VariantArray->_data->end(), (pos + 1) - size(), Variant::null);
+
+    return (*data_._VariantArray->_data)[pos];
+}
+
+Variant& Variant::operator [] (std::string key)
+{
+    if(typeID() != HashTable)
+        *this = Variant(std::map<std::string, Variant>());
+
+    return (*data_._HashTable->_data)[key];
 }
 
 size_t Variant::size() const
 {
     if(typeID() == VariantArray)
         return data_._VariantArray->_data->size();
+    if(typeID() == HashTable)
+        return data_._HashTable->_data->size();
     if(typeID() == String)
         return data_._String->_data->size();
     if(typeID() == Null)
         return 0;
     else
         return 1;
+}
+
+std::string Variant::toJSON() const
+{
+    return toJSON_private(std::string(""), false);
+}
+
+std::string Variant::toJSONPretty() const
+{
+    return toJSON_private(std::string(""), true);
+}
+
+std::string Variant::toJSON_private(std::string identation, bool blankspaces) const
+{
+    const std::string identation_sep = (blankspaces) ? "    " : std::string("");
+
+    std::ostringstream rval;
+    if(data_type == Null)
+        rval << "null";
+    else if(data_type == String)
+        rval << "\"" << *(data_._String->_data) << "\"";
+    else if(data_type == Variant::Note)
+        rval << "\"@" << data_._Note.toString() << "\"";
+    else if(data_type == Bool)
+        rval << ((data_._Bool) ? "true" : "false");
+    else if(data_type == Nibble || data_type == Byte || data_type == Word || data_type == Integer ||
+            data_type == Long || data_type == Float || data_type == Double)
+        rval << toString();
+    else if(data_type == VariantArray)
+    {
+        if(blankspaces)
+            rval << std::endl << identation << "[" << std::endl;
+        else
+            rval << identation << "[";
+
+        for(std::vector<Variant>::const_iterator vit = data_._VariantArray->_data->begin();
+            vit != data_._VariantArray->_data->end();
+            vit++)
+        {
+            rval << identation << vit->toJSON_private(identation_sep + identation, blankspaces);
+            if(vit != (data_._VariantArray->_data->end() - 1))
+            {
+                rval << ",";
+                if(blankspaces)
+                    rval << std::endl;
+            }
+        }
+
+        if(blankspaces)
+            rval << std::endl << identation << "]";
+        else
+            rval << identation << "]";
+    }
+    else if(data_type == HashTable)
+    {
+        if(blankspaces)
+            rval << std::endl << identation << "{" << std::endl;
+        else
+            rval << identation << "{";
+
+        for(std::map<std::string, Variant>::const_iterator mit = data_._HashTable->_data->begin();;)
+        {
+            if(blankspaces)
+                rval << identation << "\"" << mit->first << "\": " << mit->second.toJSON_private(identation_sep + identation, blankspaces);
+            else
+                rval << identation << "\"" << mit->first << "\":" << mit->second.toJSON_private(identation_sep + identation, blankspaces);
+
+            mit++;
+            if(mit != data_._HashTable->_data->end())
+            {
+                rval << ",";
+                if(blankspaces)
+                    rval << std::endl;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if(blankspaces)
+            rval << std::endl << identation << "}";
+        else
+            rval << identation << "}";
+
+    }
+
+    return rval.str();
 }

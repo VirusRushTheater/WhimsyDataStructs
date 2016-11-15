@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <map>
 
 #include "whimsynote.h"
 #include "whimsybase.h"
@@ -14,8 +15,6 @@ typedef uint64_t            FlagType;
 
 namespace whimsycore
 {
-
-class Tree;
 
 class Variant : public Base
 {
@@ -36,8 +35,8 @@ public:
         Note,
         String,
         VariantArray,
+        HashTable,
         Effect,
-        GenericTree,
         GenericPointer
     };
 
@@ -89,7 +88,7 @@ public:
         VDPointer<std::string>*                 _String;
         VDPointer<std::vector<Variant> >*       _VariantArray;
         VDPointer<char>*                        _Pointer;
-
+        VDPointer<std::map<std::string, Variant> >* _HashTable;
     };
 
     static const Variant            null;
@@ -103,8 +102,9 @@ public:
     Variant(double _double);
     Variant(whimsycore::Note _note);
     Variant(const char* _cstr);
-    Variant(std::string _cstr);
-    Variant(std::vector<Variant> _array);
+    Variant(const std::string& _cstr);
+    Variant(const std::vector<Variant>& _array);
+    Variant(const std::map<std::string, Variant>& _hashtable);
 
     Variant&                        operator=(const Variant& wref);
 
@@ -129,6 +129,11 @@ public:
     whimsycore::Note                noteValue() const;
     std::string                     stringValue() const;
     std::vector<Variant>            arrayValue() const;
+    std::map<std::string, Variant>  hashtableValue() const;
+
+    std::string&                    stringReference();
+    std::vector<Variant>&           arrayReference();
+    std::map<std::string, Variant>& hashtableReference();
 
     template<typename T>            operator T(){return value<T>();}
     template<typename T> T          value() const;
@@ -136,11 +141,15 @@ public:
     std::string                     toString() const;
     std::string                     toString(OutputStringFormat ot) const;
 
+    std::string                     toJSON() const;
+    std::string                     toJSONPretty() const;
+
     bool                            isLowerThan(const Variant& v) const;
     bool                            isGreaterThan(const Variant& v) const;
     bool                            isEqualThan(const Variant& v) const;
 
     Variant&                        at(size_t pos);
+    Variant&                        at(std::string key);
     size_t                          size() const;
 
     bool                            operator== (const Variant& v) const;
@@ -149,17 +158,21 @@ public:
     bool                            operator<= (const  Variant& v) const;
     bool                            operator>= (const  Variant& v) const;
     Variant&                        operator [] (size_t pos);
+    Variant&                        operator [] (std::string key);
 
     static bool                     typeUsesExtraMemory(Type t);
     static bool                     typeIsNumeric(Type t);
     static bool                     typeIsInteger(Type t);
     static bool                     typeIsFloatingPoint(Type t);
 
+
     ~Variant();
 
 protected:
     Type                data_type;
     VariantData         data_;
+
+    std::string                     toJSON_private(std::string identation, bool whitespaces) const;
 
     bool                            isUsingExtraMemory() const;
     void                            noteFix();
