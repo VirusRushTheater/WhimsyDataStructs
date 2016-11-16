@@ -5,8 +5,8 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
-    Variant hst;
-    hst["webo"][4]["lel"] = "pedro";
+    Variant hst, hou;
+    hst["webo"][15000]["lel"] = "pedro";
 
     hst["mobius"] = "The Architect";
     hst["kek"] = "Json";
@@ -22,8 +22,13 @@ int main(int argc, char** argv)
     hst["kek"]["3"]["d"][2] = 5.5;
     hst["kek"]["3"]["d"][3] = "the host 4";
 
+    hst = 3.14;
+    hst = 1592;
 
-    std::cout << hst.toJSONPretty();
+    hou.parse("{\"uno\":1, \"dos\":2, \"tres\":3}");
+
+    std::cout << hou << std::endl;
+    std::cout << hou["uno"] << std::endl;
 
     return 0;
 }

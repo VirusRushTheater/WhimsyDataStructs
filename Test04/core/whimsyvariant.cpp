@@ -1229,3 +1229,388 @@ std::string Variant::toJSON_private(std::string identation, bool blankspaces) co
 
     return rval.str();
 }
+
+void Variant::parse(const char *pstr)
+{
+    char* bufferstr = strdup(pstr);
+    char* freevar = bufferstr;
+    *this = parse_value(&bufferstr);
+    free(freevar);
+}
+
+Variant Variant::parse_value(char **pstrptr)
+{
+    char character;
+
+    // Waiting for a Value.
+    for(; **pstrptr != '\0'; (*pstrptr)++)
+    {
+        character = **pstrptr;
+
+        // Identify the next object.
+        // Omit whitespaces.
+        if(character == ' ' || character == '\n' || character == '\r' || character == '\t')
+            continue;
+
+        // It's a string if a " is found.
+        else if(character == '\"')
+        {
+            return parse_string(pstrptr);
+        }
+
+        else if(character == '-' || (character >= '0' && character <= '9'))
+        {
+            return parse_number(pstrptr);
+        }
+
+        else if(character == '{')
+        {
+            (*pstrptr)++;
+            return parse_object(pstrptr);
+        }
+
+        else if(character == '[')
+        {
+            (*pstrptr)++;
+            return parse_array(pstrptr);
+        }
+
+        else if(character == 't')
+        {
+            if(strncmp(*pstrptr, "true", 4) == 0)
+                return Variant(true);
+            else
+                break;
+        }
+
+        else if(character == 'f')
+        {
+            if(strncmp(*pstrptr, "false", 5) == 0)
+                return Variant(false);
+            else
+                break;
+        }
+
+        else if(character == 'n')
+        {
+            if(strncmp(*pstrptr, "null", 4) == 0)
+                return Variant::null;
+            else
+                break;
+        }
+
+        else
+            break;
+    }
+
+    throw Exception(NULL, Exception::ParserSyntaxError, "Unexpected expression.");
+    return Variant::null;
+}
+
+Variant Variant::parse_string(char **pstrptr)
+{
+    char    character;
+    char*   string_stack = ++(*pstrptr);
+
+    // Waiting for a Value.
+    for(; **pstrptr != '\0'; (*pstrptr)++)
+    {
+        character = **pstrptr;
+
+        // It's a string if a " is found. Close it.
+        // If prefixed by '@', it's a note.
+        if(character == '\"')
+        {
+            **pstrptr = '\0';
+            (*pstrptr)++;
+            if(string_stack[0] == '@')
+                return Variant(whimsycore::Note(&(string_stack[1])));
+            else
+                return Variant(std::string(string_stack));
+        }
+        else if(character == '\\')
+        {
+            (*pstrptr)++;
+        }
+    }
+
+    // If exits this "for", string parsing has failed. Report.
+    throw Exception(NULL, Exception::ParserSyntaxError, "Non closed string.");
+    return Variant::null;
+}
+
+Variant Variant::parse_number(char **pstrptr)
+{
+    // Followed the diagram at http://www.json.org/number.gif
+    char    character;
+    char*   string_stack = *pstrptr;
+    Variant retval;
+
+    byte    state = 0;
+
+    // Waiting for a Value.
+    for(; **pstrptr != '\0'; (*pstrptr)++)
+    {
+        character = **pstrptr;
+
+        // Start or pre-digit.
+        if(state == 0)
+        {
+            if(character == '-')
+                state = 1;
+            else if(character == '0')
+                state = 2;
+            else if(character >= '1' && character <= '9')
+                state = 3;
+            else if(character == '.')
+                state = 4;
+            else
+                break;
+        }
+        else if(state == 1)
+        {
+            if(character == '0')
+                state = 2;
+            else if(character >= '1' && character <= '9')
+                state = 3;
+            else
+                break;
+        }
+        else if(state == 2)
+        {
+            if(character == '.')
+                state = 4;
+            else if(character == 'e' || character == 'E')
+                state = 6;
+            else
+                break;
+        }
+        else if(state == 3)
+        {
+            if(character >= '0' && character <= '9')
+                continue;
+            else if(character == '.')
+                state = 4;
+            else if(character == 'e' || character == 'E')
+                state = 6;
+            else
+                break;
+        }
+        else if(state == 4)
+        {
+            if(character >= '0' && character <= '9')
+                state = 5;
+            else
+                break;
+        }
+        else if(state == 5)
+        {
+            if(character >= '0' && character <= '9')
+                continue;
+            else if(character == 'e' || character == 'E')
+                state = 6;
+            else
+                break;
+        }
+        else if(state == 6)
+        {
+            if(character >= '0' && character <= '9')
+                state = 8;
+            else if(character == '+' || character == '-')
+                state = 7;
+            else
+                break;
+        }
+        else if(state == 7)
+        {
+            if(character >= '0' && character <= '9')
+                state = 8;
+            else
+                break;
+        }
+        else if(state == 7)
+        {
+            if(character >= '0' && character <= '9')
+                continue;
+            else
+                break;
+        }
+    }
+
+    // Integer
+    if(state == 2 || state == 3)
+    {
+        character = **pstrptr;
+        **pstrptr = '\0';
+        retval = Variant(strtoll(string_stack, NULL, 10));
+        **pstrptr = character;
+
+        return retval;
+    }
+    // Decimal
+    if(state == 5 || state == 8)
+    {
+        character = **pstrptr;
+        **pstrptr = '\0';
+        retval = Variant(strtod(string_stack, NULL));
+        **pstrptr = character;
+
+        return retval;
+    }
+    else
+    {
+        throw Exception(NULL, Exception::ParserSyntaxError, "Malformed number.");
+        return Variant::null;
+    }
+
+}
+
+Variant Variant::parse_array(char **pstrptr)
+{
+    char    character;
+    bool    stacked_element = false;
+    Variant stack = Variant::null;
+
+    Variant retval = std::vector<Variant>();
+
+    for(; **pstrptr != '\0'; (*pstrptr)++)
+    {
+        character = **pstrptr;
+
+        // Omit whitespaces.
+        if(character == ' ' || character == '\n' || character == '\r' || character == '\t')
+            continue;
+
+        else if(character == ',')
+        {
+            if(!stacked_element)
+            {
+                throw Exception(NULL, Exception::ParserSyntaxError, "A comma was not expected.");
+                return Variant::null;
+            }
+
+            stacked_element = false;
+            retval.arrayReference().push_back(Variant(stack));
+            stack = Variant::null;
+        }
+
+        else if(character == ']')
+        {
+            if(stacked_element)
+            {
+                retval.arrayReference().push_back(Variant(stack));
+            }
+            (*pstrptr)++;
+            return retval;
+        }
+
+        else
+        {
+            // If stacked_element is true, a comma is missing. Break and throw exception.
+            if(stacked_element)
+            {
+                throw Exception(NULL, Exception::ParserSyntaxError, "A comma or array closing ] was expected.");
+                return Variant::null;
+            }
+
+            stacked_element = true;
+            stack = parse_value(pstrptr);
+            (*pstrptr)--;
+        }
+    }
+
+    // If it reaches this point, the array never was closed.
+    throw Exception(NULL, Exception::ParserSyntaxError, "The array was never closed.");
+    return Variant::null;
+}
+
+Variant Variant::parse_object(char **pstrptr)
+{
+    char    character;
+
+    bool    stacked_element = false;
+    Variant key;
+    Variant stack = Variant::null;
+
+    Variant retval = std::map<std::string, Variant>();
+
+    for(; **pstrptr != '\0'; (*pstrptr)++)
+    {
+        character = **pstrptr;
+
+        // Omit whitespaces.
+        if(character == ' ' || character == '\n' || character == '\r' || character == '\t')
+            continue;
+
+        else if(character == '}')
+        {
+            if(stacked_element)
+            {
+                retval.hashtableReference()[key.toString()] = Variant(stack);
+            }
+            (*pstrptr)++;
+            return retval;
+        }
+
+        else if(character == ',')
+        {
+            if(!stacked_element)
+            {
+                throw Exception(NULL, Exception::ParserSyntaxError, "A comma was not expected.");
+                return Variant::null;
+            }
+
+            stacked_element = false;
+            retval.hashtableReference()[key.toString()] = Variant(stack);
+            stack = Variant::null;
+        }
+
+        else if(character == '\"')
+        {
+            if(stacked_element)
+            {
+                throw Exception(NULL, Exception::ParserSyntaxError, "A comma or object closing } was expected.");
+                return Variant::null;
+            }
+            key = parse_string(pstrptr);
+
+            // Found an EOF.
+            if(!parser_skipwhitespaces(pstrptr))
+            {
+                break;
+            }
+
+            if((**pstrptr) == ':')
+            {
+                (*pstrptr)++;
+                stack = parse_value(pstrptr);
+                (*pstrptr)--;
+                stacked_element = true;
+            }
+        }
+
+        else
+        {
+            throw Exception(NULL, Exception::ParserSyntaxError, "Expecting Key ID.");
+            return Variant::null;
+        }
+    }
+
+    // If it reaches this point, the array never was closed.
+    throw Exception(NULL, Exception::ParserSyntaxError, "The object was never closed.");
+    return Variant::null;
+}
+
+bool Variant::parser_skipwhitespaces(char **pstrptr)
+{
+    char character;
+    for(; **pstrptr != '\0'; (*pstrptr)++)
+    {
+        character = **pstrptr;
+        if(character == ' ' || character == '\n' || character == '\r' || character == '\t')
+            continue;
+        else
+            return true;
+    }
+    return false;
+}

@@ -160,22 +160,31 @@ public:
     Variant&                        operator [] (size_t pos);
     Variant&                        operator [] (std::string key);
 
+    void                            parse(const char* pstr);
+
     static bool                     typeUsesExtraMemory(Type t);
     static bool                     typeIsNumeric(Type t);
     static bool                     typeIsInteger(Type t);
     static bool                     typeIsFloatingPoint(Type t);
 
-
     ~Variant();
 
 protected:
-    Type                data_type;
-    VariantData         data_;
+    Type                            data_type;
+    VariantData                     data_;
 
     std::string                     toJSON_private(std::string identation, bool whitespaces) const;
 
     bool                            isUsingExtraMemory() const;
     void                            noteFix();
+
+private:
+    Variant                         parse_value(char** pstrptr);
+    Variant                         parse_string(char** pstrptr);
+    Variant                         parse_number(char** pstrptr);
+    Variant                         parse_object(char** pstrptr);
+    Variant                         parse_array(char** pstrptr);
+    bool                            parser_skipwhitespaces(char** pstrptr);
 };
 }
 
