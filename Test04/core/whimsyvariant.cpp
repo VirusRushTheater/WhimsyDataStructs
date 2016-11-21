@@ -1361,7 +1361,10 @@ Variant Variant::parse_value(char **pstrptr)
         else if(character == 't')
         {
             if(strncmp(*pstrptr, "true", 4) == 0)
+            {
+                (*pstrptr) += 4;
                 return Variant(true);
+            }
             else
                 break;
         }
@@ -1369,7 +1372,10 @@ Variant Variant::parse_value(char **pstrptr)
         else if(character == 'f')
         {
             if(strncmp(*pstrptr, "false", 5) == 0)
+            {
+                (*pstrptr) += 5;
                 return Variant(false);
+            }
             else
                 break;
         }
@@ -1377,7 +1383,10 @@ Variant Variant::parse_value(char **pstrptr)
         else if(character == 'n')
         {
             if(strncmp(*pstrptr, "null", 4) == 0)
+            {
+                (*pstrptr) += 4;
                 return Variant::null;
+            }
             else
                 break;
         }
