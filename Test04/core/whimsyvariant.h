@@ -8,6 +8,7 @@
 
 #include "whimsynote.h"
 #include "whimsybase.h"
+#include "whimsybytestream.h"
 
 #define WHIMSYVARIANT_ENABLE_TYPE_CASTING      1
 
@@ -36,6 +37,7 @@ public:
         String,
         VariantArray,
         HashTable,
+        BinaryBlob,
         Effect,
         GenericPointer
     };
@@ -89,6 +91,7 @@ public:
         VDPointer<std::vector<Variant> >*       _VariantArray;
         VDPointer<char>*                        _Pointer;
         VDPointer<std::map<std::string, Variant> >* _HashTable;
+        VDPointer<ByteStream>*                  _BinaryBlob;
     };
 
     static const Variant            null;
@@ -105,6 +108,7 @@ public:
     Variant(const std::string& _cstr);
     Variant(const std::vector<Variant>& _array);
     Variant(const std::map<std::string, Variant>& _hashtable);
+    Variant(const ByteStream& _binaryblob);
 
     Variant&                        operator=(const Variant& wref);
 
@@ -130,10 +134,12 @@ public:
     std::string                     stringValue() const;
     std::vector<Variant>            arrayValue() const;
     std::map<std::string, Variant>  hashtableValue() const;
+    ByteStream                      binaryblobValue() const;
 
     std::string&                    stringReference();
     std::vector<Variant>&           arrayReference();
     std::map<std::string, Variant>& hashtableReference();
+    ByteStream&                     binaryblobReference();
 
     template<typename T>            operator T(){return value<T>();}
     template<typename T> T          value() const;

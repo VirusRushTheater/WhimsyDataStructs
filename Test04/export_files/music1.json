@@ -37,8 +37,7 @@
             "index": 0,
             "name": "DPCM 1",
             "type": "NES-DPCM",
-            "data":
-               "5dAUkGbAOS8VvQ+AetqAF+wSQPisAoQOmSz2hkpQ3TifA+nJPcZV2mdpoa3dQ57g5CiRJbLt7gqg
+            "data": "#5dAUkGbAOS8VvQ+AetqAF+wSQPisAoQOmSz2hkpQ3TifA+nJPcZV2mdpoa3dQ57g5CiRJbLt7gqg
                 NReae5FjzE0n/bsGlljmmQNsMXZ8L4kTV4qhZepLkkyHjOw7J6RVpN3jNZ9pB2WGuig0HXDB5JFf
                 0VkTvVlapkp5W1apzoiXLEojAc7uSFBjr48S8mcEZKl04IcTXT0qUzQPWfMuMi2dtRdGFJ9ke0W/
                 pmFBwVyWrlFF0E2LzToxVjjgnnvHDT5nHWjLNaGoUphGhZmJgGZsTfPpTaqBcZ8m3oSsDxRVUNUz
@@ -61,36 +60,45 @@
         },
         "map":
         {
+            "frame-cols":
+            {
+                "SQ01": 0, "SQ02": 1, "TRI": 2, "NOI": 3, "DPCM": 4
+            }
             "frame":
             [
-                {"SQ01": 1, "SQ02": 0, "TRI": "-", "NOI": "-", "DPCM": "-"},
-                {"SQ01": 0, "SQ02": "-", "TRI": "-", "NOI": "-", "DPCM": "-"},
-                {"SQ01": 1, "SQ02": "-", "TRI": "-", "NOI": "-", "DPCM": "-"}
+                [1, 0, null, null, null],
+                [0, null, null, null, null],
+                [1, null, null, null, null],
             ]
         },
         "patterns":
         {
+            "pattern-cols":
+            {
+                "SQ01": {"NOTE": 0, "PAT": 1, "VOL": 2, "DC": 3, "FX": 4},
+                "SQ02": {"NOTE": 0, "PAT": 1, "VOL": 2, "DC": 3, "FX": 4}
+            },
             "SQ01":
             [
                 [
-                    {"NOTE": "C-4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "C#4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "D-4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "D#4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"}
+                    ["@C-4", 0, 15, 0, "G0,G2 00"],
+                    ["@C#4", 0, 15, 0, "G0,G2 00"],
+                    ["@D-4", 0, 15, 0, "G0,G2 00"],
+                    ["@D#4", 0, 15, 0, "G0,G2 00"]
                 ],
                 [
-                    {"NOTE": "C-4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "C#4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"}
+                    ["@C-4", 0, 15, 0, "G0,G2 00"],
+                    ["@C#4", 0, 15, 0, "G0,G2 00"]
                 ]
             ],
             
             "SQ02":
             [
                 [
-                    {"NOTE": "C-4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "C#4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "D-4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"},
-                    {"NOTE": "D#4", "PAT": 0, "VOL": 15, "DC": 0, "FX": "G0,G2 00"}
+                    ["@C-4", 0, 15, 0, "G0,G2 00"],
+                    ["@C#4", 0, 15, 0, "G0,G2 00"],
+                    ["@D-4", 0, 15, 0, "G0,G2 00"],
+                    ["@D#4", 0, 15, 0, "G0,G2 00"]
                 ]
             ]
             

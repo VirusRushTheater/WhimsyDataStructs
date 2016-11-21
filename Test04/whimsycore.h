@@ -6,5 +6,3 @@
 #include "core/whimsynote.h"
 #include "core/whimsyvariant.h"
 #include "core/whimsyvector.h"
-#include "core/whimsytree.h"
-#include "core/whimsyparser.h"

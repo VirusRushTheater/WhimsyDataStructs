@@ -1,7 +1,19 @@
 #include "whimsyexception.h"
 #include "whimsybytestream.h"
 
+#define B64ENCODE(N)    b64_encodingtable[N]
+#define B64DECODE(C)    b64_decodingtable[(byte)C]
+
 using namespace whimsycore;
+
+void memcpy_reverse(void* dest, const void* src, size_t length)
+{
+    byte* __dest    = (byte*) dest;
+    byte* __src     = (byte*) src;
+    size_t cursor, rev_cursor;
+    for(cursor = 0, rev_cursor = length - 1; cursor < length; cursor++, rev_cursor--)
+        *(__dest + rev_cursor) = *(__src + cursor);
+}
 
 ByteStream& ByteStream::addIntReverseEndian(int32_t number)
 {
@@ -245,3 +257,297 @@ size_t ByteStream::readFile(const char *filepath)
 
     return retval;
 }
+
+size_t ByteStream::base64Decode(const char *b64)
+{
+    // 4 characters in b64 -> 3 characters in b256 (byte)
+    // Characters might be padded with a maximum trailing number of three (3) equals (=)
+    // This algorithm doesn't do safety checks. Be aware.
+
+    // 64: Equals (=), 65: Whitespace, 66: Invalid
+    const byte b64_decodingtable[] = {
+    //              0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+        /* 00 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 65, 65, 66, 66, 65, 66, 66,
+        /* 10 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* 20 */    65, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 62, 66, 66, 66, 63,
+        /* 30 */    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 66, 66, 66, 64, 66, 66,
+        /* 40 */    66,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+        /* 50 */    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 66, 66, 66, 66, 66,
+        /* 60 */    66, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+        /* 70 */    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 66, 66, 66, 66, 66,
+        /* 80 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* 90 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* A0 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* B0 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* C0 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* D0 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* E0 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+        /* F0 */    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66
+    };
+
+    // 4 characters in the buffer = 3 bytes.
+    unsigned long int charpack = 0;
+    byte* charpack_array = (byte*)&charpack;
+
+    size_t readbytes = 0;
+    byte readchars = 0;
+
+    byte padding = 0;
+    byte code;
+
+    for(; *b64 != '\0'; b64++)
+    {
+        code = b64_decodingtable[(byte) *b64];
+
+        // Skip whitespaces.
+        if(code == 65)
+            continue;
+        // Invalid characters make this function halt.
+        else if(code == 66)
+            return 0;
+
+        charpack <<= 6;
+        if(code == 64)
+            padding++;
+        else
+            charpack |= code;
+
+        if(++readchars == 4)
+        {
+#if LITTLE_ENDIAN
+            charpack_array[2] ^= charpack_array[0];
+            charpack_array[0] ^= charpack_array[2];
+            charpack_array[2] ^= charpack_array[0];
+#else
+            charpack <<= 8;
+#endif
+            pushArray(charpack_array, 3 - padding);
+            readbytes += (3 - padding);
+
+            readchars = 0;
+            charpack = 0;
+            if(padding != 0)
+                break;
+        }
+    }
+
+    return readbytes;
+}
+
+std::string ByteStream::base64Encode() const
+{
+    std::string retval = "";
+    const char b64_encodingtable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+    if(size() == 0)
+        return std::string();
+
+    size_t cursor = 0;
+
+    char encoded_array[5];
+    encoded_array[4] = '\0';
+
+    unsigned int bitmask = 0, encoding_buffer = 0;
+
+    byte readbytes;
+
+    do
+    {
+        readbytes = (size() - cursor >= 3) ? 3 : size() - cursor;
+#if LITTLE_ENDIAN
+        memcpy_reverse(&encoding_buffer, &at(cursor), readbytes);
+        encoding_buffer <<= (8 * (3 - readbytes));
+
+        bitmask = 18;
+        for(byte i = 0; i < 4; i++, bitmask -= 6)
+        {
+            if(i > readbytes)
+                encoded_array[i] = '=';
+            else
+                encoded_array[i] = b64_encodingtable[(encoding_buffer >> bitmask) & 63];
+        }
+#else
+        memcpy(&encoding_buffer, &at(cursor), readbytes);
+        for(byte i = 0; i < 4; i++, bitmask += 6)
+        {
+            if(i > readbytes)
+                encoded_array[i] = '=';
+            else
+                encoded_array[i] = b64_encodingtable[(encoding_buffer >> bitmask) & 63];
+        }
+#endif
+
+        bitmask = 0;
+        encoding_buffer = 0;
+        cursor += readbytes;
+
+        retval.append(encoded_array, 4);
+    }
+    while(cursor < size());
+
+    return retval;
+}
+
+size_t ByteStream::hexDecode(const char *bhex)
+{
+    // 4 characters in b64 -> 3 characters in b256 (byte)
+    // Characters might be padded with a maximum trailing number of three (3) equals (=)
+    // This algorithm doesn't do safety checks. Be aware.
+
+    // This isn't too optimized. It pushes things bit by bit.
+
+    byte buffer = 0;
+    bool bproc = false;
+    byte charvalue;
+    char character;
+    size_t bytesread = 0;
+
+    const char* bhexptr = bhex;
+
+    for(; *bhexptr != '\0'; bhexptr++)
+    {
+        character = *bhexptr;
+        if(character == ' ' || character == '\n' || character == '\t' || character == '\r')
+            continue;
+        else if((character >= '0' && character <= '9'))
+        {
+            charvalue = character - '0';
+            goto process_char;
+        }
+        else if((character >= 'A' && character <= 'F'))
+        {
+            charvalue = character - 'A' + 10;
+            goto process_char;
+        }
+        else if((character >= 'a' && character <= 'f'))
+        {
+            charvalue = character - 'a' + 10;
+            goto process_char;
+        }
+        else
+            break;
+
+        continue;
+        process_char:
+        if(!bproc)
+        {
+            buffer = 0;
+            buffer |= (charvalue << 4);
+            bproc = true;
+        }
+        else
+        {
+            buffer |= charvalue;
+            push_back(buffer);
+            buffer = 0;
+            bytesread++;
+            bproc = false;
+        }
+    }
+
+    return bytesread;
+    return 0;
+}
+
+size_t ByteStream::hexDecodeParser(char** bhexptr)
+{
+    // 4 characters in b64 -> 3 characters in b256 (byte)
+    // Characters might be padded with a maximum trailing number of three (3) equals (=)
+    // This algorithm doesn't do safety checks. Be aware.
+
+    // This isn't too optimized. It pushes things bit by bit.
+
+    byte buffer = 0;
+    bool bproc = false;
+    byte charvalue;
+    char character;
+    size_t bytesread = 0;
+
+    for(; **bhexptr != '\0'; (*bhexptr)++)
+    {
+        character = **bhexptr;
+        if(character == ' ' || character == '\n' || character == '\t' || character == '\r')
+            continue;
+        else if((character >= '0' && character <= '9'))
+        {
+            charvalue = character - '0';
+            goto process_char;
+        }
+        else if((character >= 'A' && character <= 'F'))
+        {
+            charvalue = character - 'A' + 10;
+            goto process_char;
+        }
+        else if((character >= 'a' && character <= 'f'))
+        {
+            charvalue = character - 'a' + 10;
+            goto process_char;
+        }
+        else
+            break;
+
+        continue;
+        process_char:
+        if(!bproc)
+        {
+            buffer = 0;
+            buffer |= (charvalue << 4);
+            bproc = true;
+        }
+        else
+        {
+            buffer |= charvalue;
+            push_back(buffer);
+            buffer = 0;
+            bytesread++;
+            bproc = false;
+        }
+    }
+
+    return bytesread;
+}
+
+std::string ByteStream::hexEncode() const
+{
+    std::string retval;
+
+    const char ctable[] = "0123456789ABCDEF";
+
+    if(size() == 0)
+        return std::string();
+
+    const byte*   arraycursor = &(at(0));
+    size_t  cursor = 0;
+    char    encoded_byte[3];
+
+    encoded_byte[2] = '\0';
+
+    for(; cursor < size(); arraycursor++, cursor++)
+    {
+        encoded_byte[1] = ctable[(*arraycursor) & 0x0F];
+        encoded_byte[0] = ctable[(*arraycursor) >> 4];
+
+        retval.append(encoded_byte, 2);
+        retval.append(" ");
+        if((cursor & 31) == 31)
+            retval.append("\r\n");
+    }
+
+    return retval;
+}
+
+std::string ByteStream::toString() const
+{
+    switch(outputFormat)
+    {
+        case OutputFormat_Hex:
+            return hexEncode();
+        break;
+        case OutputFormat_Base64:
+            return base64Encode();
+        break;
+        default:
+            return hexEncode();
+    }
+}
+

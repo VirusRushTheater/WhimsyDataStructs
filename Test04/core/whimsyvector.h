@@ -13,9 +13,13 @@ namespace whimsycore
  * Due to its toString() debug method, it only can hold classes able to output their values to a STL stream, like any base classes and a whimsycore::Base derived class.
  * It will throw an error if you vectorize another, and I don't know how to make a workaround using some smart template tricks.
  */
-template <typename T, bool Strrep = true>
-class WhimsyVector : public Base, public std::vector<T>
+template <typename T>
+//class WhimsyVector : public Base, public std::vector<T>
+class WhimsyVector : public Base
 {
+protected:
+    std::vector<T> stl_container;
+
 public:
     WHIMSY_OBJECT_NAME("Core/WhimsyVector")
 
@@ -25,6 +29,10 @@ public:
      * @brief Creates an empty Vector.
      */
     WhimsyVector()
+    {
+    }
+
+    virtual ~WhimsyVector()
     {
     }
 
@@ -130,6 +138,72 @@ public:
         retval << "]";
 
         return retval.str();
+    }
+
+    // *********************************************************************************
+    // STL vector replacement methods.
+
+    size_t size() const
+    {
+        return stl_container.size();
+    }
+
+    void push_back(const T& element)
+    {
+        stl_container.push_back(element);
+    }
+
+    T* end() const
+    {
+        return ((T*)&(stl_container[0])) + stl_container.size();
+    }
+
+    T* begin() const
+    {
+        return ((T*)&(stl_container[0]));
+    }
+
+    void resize(size_t newsize)
+    {
+        stl_container.resize(newsize);
+    }
+
+    T& at(size_t index)
+    {
+        return stl_container.at(index);
+    }
+
+    const T& at(size_t index) const
+    {
+        return stl_container.at(index);
+    }
+
+    T& operator [] (size_t index)
+    {
+        return stl_container[index];
+    }
+
+    const T& operator [] (size_t index) const
+    {
+        return stl_container.at(index);
+    }
+
+    void clear()
+    {
+        stl_container.clear();
+    }
+
+    template<typename Tin>
+    T* insert(T* container_position, const Tin* incoming_begin, const Tin* incoming_end)
+    {
+        size_t offset = container_position - begin();
+        T* incoming_begin_T = (T*)incoming_begin;
+        T* incoming_end_T = (T*)incoming_end;
+        size_t difference = incoming_end_T - incoming_begin_T;
+
+        stl_container.insert(stl_container.begin() + offset, incoming_begin_T, incoming_end_T);
+
+        return &(container_position[offset + difference]);
     }
 };
 

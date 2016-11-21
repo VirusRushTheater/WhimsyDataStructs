@@ -8,8 +8,10 @@ using namespace whimsycore;
 
 int main(int argc, char** argv)
 {
+    /*
+    // Part 1
     FILE*   fh;
-    char*   fbuffer;
+    char*   fbuffer = NULL;
     Variant json;
     size_t  fsize;
 
@@ -30,6 +32,12 @@ int main(int argc, char** argv)
     std::cout << json.toJSONPretty() << std::endl;
 
     free(fbuffer);
+    */
+
+    ByteStream bs;
+    bs.addItems("This kinda award game and shiet.");
+
+    std::cout << std::endl << "-> " << bs.base64Encode() << std::endl;
 
     return 0;
 }

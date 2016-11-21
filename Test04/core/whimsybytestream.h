@@ -4,8 +4,7 @@
 #include "whimsyvector.h"
 #include "whimsyexception.h"
 
-// In the case your processor is a big-endian one, change this "define" to 1.
-#define PROCESSOR_IS_BIG_ENDIAN     0
+#include <endian.h>
 
 namespace whimsycore
 {
@@ -58,6 +57,14 @@ private:
     }
 
 public:
+    enum output_format_t
+    {
+        OutputFormat_Hex,
+        OutputFormat_Base64
+    };
+
+    output_format_t outputFormat;
+
     /**
      * @brief Creates a vector, and adds all the supplied arguments as new elements of this vector.
      * @param firstarg  Argument to ensure this constructor is called with, at least, one element.
@@ -68,6 +75,8 @@ public:
     {
         this->addItems(variadicargs...);
     }
+
+    ~ByteStream(){}
 
     /**
      * @brief Overloaded method to add items. Adds all the characters in the string (trailing zero not included)
@@ -96,11 +105,35 @@ public:
     }
 
     /**
+     * @brief Overloaded method to add items.
+     * @param vector    ByteStream to concatenate here.
+     * @param others    Variadic parameter list. Make sure all elements of this list are the same type of this vector.
+     * @return Reference to this vector.
+     */
+    template<typename ... Args>
+    ByteStream& addItems(const ByteStream& vector, Args ... others)
+    {
+        this->insert(this->end(), vector.begin(), vector.end());
+        return addItems(others...);
+    }
+
+    /**
      * @brief End for the addItems recursive algorithm. Does not do anything.
      * @return  Reference to this vector.
      */
     ByteStream& addItems()
     {
+        return *this;
+    }
+
+    /**
+     * @brief Pushes back a given amount of elements from an array. Think of this as a glorified push_back.
+     * @return Reference to this vector.
+     */
+    template<typename Tn>
+    ByteStream& pushArray(Tn* array, size_t element_amount)
+    {
+        this->insert(this->end(), array, array + element_amount);
         return *this;
     }
 
@@ -161,7 +194,7 @@ public:
         return *this;
     }
 
-#if PROCESSOR_IS_BIG_ENDIAN == 0
+#if LITTLE_ENDIAN
     inline ByteStream& addIntBigEndian(int32_t number) {return addIntReverseEndian(number);}
     inline ByteStream& addWordBigEndian(uint16_t number) {return addWordReverseEndian(number);}
     template<typename T> inline ByteStream& addVariableBigEndian(T number) {return addVariableReverseEndian<T>(number);}
@@ -263,6 +296,49 @@ public:
      * @return              Amount of bytes written.
      */
     size_t writeFile(const char* filepath);
+
+    /**
+     * @brief Converts text-based binary data (6 bit per character) into
+     * proper binary data (8 bit per character).
+     * THIS WAS ONLY TESTED IN LITTLE-ENDIAN PROCESSORS!
+     * @param b64           Base64 encoded binary stream
+     * @return              Amount of bytes resulting.
+     */
+    size_t base64Decode(const char* b64);
+
+    /**
+     * @brief Converts this ByteStream data into a text-based Binary64.
+     * @return              Encoded bytestream in Base64 format.
+     */
+    std::string base64Encode() const;
+
+    /**
+     * @brief Interprets a string of hex-written characters (ex: FF 5F 3F) as a ByteStream. Skips whitespaces
+     * and stops when a non-hex, non-whitespace character is found.
+     * @param hexstr        String of hex-written characters.
+     * @return              Amount of resulting bytes interpreted.
+     */
+    size_t hexDecode(const char* hexstr);
+
+    /**
+     * @brief Same as hexDecode(), but for use with a parser with a mobile cursor, designed for Variant's parser.
+     * @param bhexptr       Pointer to a string of hex-written characters.
+     * @return              Amount of resulting bytes interpreted.
+     */
+    size_t hexDecodeParser(char** bhexptr);
+
+    /**
+     * @brief Encodes the contents of this ByteStream into a hex string, with a newline each 32 bytes.
+     * @return              Encoded bytestream in Hex format.
+     */
+    std::string hexEncode() const;
+
+    /**
+     * @brief Encodes this ByteStream in a convenient format. Change the outputFormat property to change the output of this string.
+     * Defaults to Hex.
+     * @return              Readable encoded ByteStream.
+     */
+    std::string toString() const;
 };
 
 }

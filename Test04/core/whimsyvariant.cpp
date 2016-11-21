@@ -127,6 +127,12 @@ Variant::Variant(const std::map<std::string, Variant> &_hashtable)
     data_._HashTable =      new VDPointer<std::map<std::string, Variant> >(_hashtable);
 }
 
+Variant::Variant(const ByteStream &_binaryblob)
+{
+    data_type =             Type::BinaryBlob;
+    data_._BinaryBlob =     new VDPointer<ByteStream>(_binaryblob);
+}
+
 /**
  * @brief Assignment operator. Doesn't deep copy memory items if in memory, but passes a reference to it.
  * @param wref
@@ -204,6 +210,8 @@ const char* Variant::typeToString(Variant::Type t)
             return "pointer";
         case Type::HashTable:
             return "hashtable";
+        case Type::BinaryBlob:
+            return "binaryblob";
         default:
             return "unknown";
     }
@@ -234,6 +242,7 @@ Variant::Type Variant::typeFromString(const char* s)
     else if(!strcasecmp(s, "effect"))   return Type::Effect;
     else if(!strcasecmp(s, "pointer"))  return Type::GenericPointer;
     else if(!strcasecmp(s, "hashtable")) return Type::HashTable;
+    else if(!strcasecmp(s, "binaryblob"))  return Type::BinaryBlob;
     else                                return Type::Null;
 }
 
@@ -726,6 +735,10 @@ std::string Variant::stringValue() const
             }
             retval << "}";
         break;
+        case Type::BinaryBlob:
+            // ***
+            // Convert to base64 before outputting.
+        break;
         case Effect:
             // ---------------------------------------> Not yet implemented!
         break;
@@ -759,6 +772,48 @@ std::map<std::string, Variant> Variant::hashtableValue() const
     return retval;
 }
 
+ByteStream Variant::binaryblobValue() const
+{
+    ByteStream retval;
+    if(data_type == BinaryBlob)
+        return ByteStream(*(data_._BinaryBlob->_data));
+    else
+    {
+        switch(data_type)
+        {
+            case Bool:
+                retval.push_back((byte)data_._Bool);
+            case Nibble:
+            case Byte:
+                retval.push_back(data_._Byte);
+            case Word:
+                retval.addVariable<unsigned short>(data_._Word);
+            case Integer:
+                retval.addVariable<int>(data_._Integer);
+            case Long:
+                retval.addVariable<long long int>(data_._Long);
+            case Float:
+                retval.addVariable<float>(data_._Float);
+            case Double:
+                retval.addVariable<double>(data_._Double);
+            case Note:
+                retval.push_back(data_._Note.value());
+            case String:
+                retval.addItems(data_._String->_data->c_str());
+            case VariantArray:
+            case Effect:
+                for(std::vector<Variant>::const_iterator cit = data_._VariantArray->_data->begin();
+                    cit != data_._VariantArray->_data->end(); cit++)
+                retval.addItems(cit->binaryblobValue());
+            default:
+                throw Exception(this, Exception::InvalidConversion, "Unknown conversion to Binary Blob.");
+                return 0;
+        }
+    }
+
+    return retval;
+}
+
 std::string& Variant::stringReference()
 {
     return *(data_._String->_data);
@@ -772,6 +827,11 @@ std::vector<Variant>& Variant::arrayReference()
 std::map<std::string, Variant>& Variant::hashtableReference()
 {
     return *(data_._HashTable->_data);
+}
+
+ByteStream& Variant::binaryblobReference()
+{
+    return *(data_._BinaryBlob->_data);
 }
 
 /**
@@ -878,6 +938,10 @@ std::string Variant::toString(OutputStringFormat ot) const
                 }
                 retval << "}";
             break;
+            case Type::BinaryBlob:
+                // ***
+                // Convert to base64 before outputting.
+            break;
             case Type::Effect:
                 // ---------------------------------------> Not yet implemented!
             break;
@@ -894,7 +958,8 @@ bool Variant::typeUsesExtraMemory(Variant::Type t)
             t == Type::VariantArray ||
             t == Type::Effect ||
             t == Type::HashTable ||
-            t == Type::GenericPointer)
+            t == Type::GenericPointer ||
+            t == Type::BinaryBlob)
         return true;
     else
         return false;
@@ -974,7 +1039,8 @@ Variant& Variant::convert(Variant::Type t)
         case Double:    rval = doubleValue();   break;
         case Note:      rval = noteValue();     break;
         case String:    rval = stringValue();   break;
-    case HashTable: rval = hashtableValue(); break;
+        case HashTable: rval = hashtableValue(); break;
+    case BinaryBlob:    rval = binaryblobValue(); break;
         case VariantArray:
         case Effect:    rval = arrayValue();    break;
     default: break;
@@ -1111,13 +1177,21 @@ bool Variant::operator >= (const  Variant& v) const
 
 Variant& Variant::operator [] (size_t pos)
 {
-    if(typeID() != VariantArray)
+    if(data_type == VariantArray)
+    {
+        if(pos >= size())
+            data_._VariantArray->_data->insert(data_._VariantArray->_data->end(), (pos + 1) - size(), Variant::null);
+
+        return (*data_._VariantArray->_data)[pos];
+    }
+    else
+    {
         *this = Variant(std::vector<Variant>());
+        if(pos >= size())
+            data_._VariantArray->_data->insert(data_._VariantArray->_data->end(), (pos + 1) - size(), Variant::null);
+        return (*data_._VariantArray->_data)[pos];
+    }
 
-    if(pos >= size())
-        data_._VariantArray->_data->insert(data_._VariantArray->_data->end(), (pos + 1) - size(), Variant::null);
-
-    return (*data_._VariantArray->_data)[pos];
 }
 
 Variant& Variant::operator [] (std::string key)
@@ -1136,6 +1210,8 @@ size_t Variant::size() const
         return data_._HashTable->_data->size();
     if(typeID() == String)
         return data_._String->_data->size();
+    if(typeID() == BinaryBlob)
+        return data_._BinaryBlob->_data->size();
     if(typeID() == Null)
         return 0;
     else
@@ -1312,6 +1388,10 @@ Variant Variant::parse_string(char **pstrptr)
     char    character;
     char*   string_stack = ++(*pstrptr);
 
+    bool    ignorewhitespaces = (**pstrptr == '#');
+    if(ignorewhitespaces)
+        ++(*pstrptr);
+
     // Waiting for a Value.
     for(; **pstrptr != '\0'; (*pstrptr)++)
     {
@@ -1319,6 +1399,7 @@ Variant Variant::parse_string(char **pstrptr)
 
         // It's a string if a " is found. Close it.
         // If prefixed by '@', it's a note.
+        // If prefixed by '#', it's a base64-encoded binary. Whitespaces within are omitted.
         if(character == '\"')
         {
             **pstrptr = '\0';
