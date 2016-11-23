@@ -137,9 +137,13 @@ public:
     ByteStream                      binaryblobValue() const;
 
     std::string&                    stringReference();
+    const std::string&                    stringReference() const;
     std::vector<Variant>&           arrayReference();
+    const std::vector<Variant>&           arrayReference() const;
     std::map<std::string, Variant>& hashtableReference();
+    const std::map<std::string, Variant>& hashtableReference() const;
     ByteStream&                     binaryblobReference();
+    const ByteStream&                     binaryblobReference() const;
 
     template<typename T>            operator T(){return value<T>();}
     template<typename T> T          value() const;
@@ -167,6 +171,11 @@ public:
     Variant&                        operator [] (std::string key);
 
     void                            parse(const char* pstr);
+
+    Variant&                        merge(const Variant& with);
+
+    bool                            keyExists(const std::string& key) const;
+    bool                            indexExists(const size_t key) const;
 
     static bool                     typeUsesExtraMemory(Type t);
     static bool                     typeIsNumeric(Type t);

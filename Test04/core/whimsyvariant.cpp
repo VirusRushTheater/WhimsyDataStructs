@@ -819,7 +819,17 @@ std::string& Variant::stringReference()
     return *(data_._String->_data);
 }
 
+const std::string& Variant::stringReference() const
+{
+    return *(data_._String->_data);
+}
+
 std::vector<Variant>& Variant::arrayReference()
+{
+    return *(data_._VariantArray->_data);
+}
+
+const std::vector<Variant>& Variant::arrayReference() const
 {
     return *(data_._VariantArray->_data);
 }
@@ -829,7 +839,17 @@ std::map<std::string, Variant>& Variant::hashtableReference()
     return *(data_._HashTable->_data);
 }
 
+const std::map<std::string, Variant>& Variant::hashtableReference() const
+{
+    return *(data_._HashTable->_data);
+}
+
 ByteStream& Variant::binaryblobReference()
+{
+    return *(data_._BinaryBlob->_data);
+}
+
+const ByteStream& Variant::binaryblobReference() const
 {
     return *(data_._BinaryBlob->_data);
 }
@@ -1723,4 +1743,50 @@ bool Variant::parser_skipwhitespaces(char **pstrptr)
             return true;
     }
     return false;
+}
+
+bool Variant::keyExists(const std::string &key) const
+{
+    if(data_type == HashTable)
+        return data_._HashTable->_data->find(key) != data_._HashTable->_data->end();
+    else
+        return false;
+}
+
+bool Variant::indexExists(const size_t key) const
+{
+    return (data_type == VariantArray && key < size());
+}
+
+Variant& Variant::merge(const Variant &with)
+{
+    if(data_type == HashTable)
+    {
+        if(with.data_type == HashTable)
+        {
+            for(std::map<std::string, Variant>::const_iterator wit = with.hashtableReference().begin();
+                wit != with.hashtableReference().end();
+                wit++)
+            {
+                (*this)[wit->first].merge(wit->second);
+            }
+        }
+        else
+        {
+            *this = with;
+        }
+    }
+    else if(data_type == VariantArray)
+    {
+        if(with.data_type == VariantArray)
+            this->arrayReference().insert(this->arrayReference().end(), with.arrayReference().begin(), with.arrayReference().end());
+        else
+            this->arrayReference().push_back(with);
+    }
+    else
+    {
+        *this = with;
+    }
+
+    return *this;
 }
